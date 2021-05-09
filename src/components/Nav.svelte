@@ -16,6 +16,7 @@
     justify-content: space-between;
     letter-spacing: 0.3px;
     border-bottom: 5px solid #f2f2f2;
+    padding: .5rem 1rem;
   }
 
   .navbar-brand {

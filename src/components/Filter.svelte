@@ -216,6 +216,13 @@
 
   .nav-link {
     cursor: default;
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .nav-link:hover {
+    color: rgba(0, 0, 0, 0.7);
+  }
+  .nav-link.active {
+    color: rgba(0, 0, 0, 0.9);
   }
 
   .items {

@@ -13,4 +13,8 @@
     --nav: 80px;
     --filter: 289px;
   }
+
+  :global(body){
+    font-family: var(--bs-font-monospace);
+  }
 </style>

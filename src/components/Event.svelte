@@ -21,6 +21,8 @@
   };
 
   const search = () => {
+    const div = document.getElementById("results");
+    if (div) div.scrollTop = 0;
     if (!$query) {
       if (!$filter.name) results = [];
       else results = $events;
@@ -71,43 +73,53 @@
     <span style="float:right">{`(${results.length}/${$events.length})`}</span>
   </div>
   {#if results.length}
-    <div style="height:calc(100% - 91px);overflow-y:overlay">
+    <div id="results">
       {#each results as result}
         <table class="table table-bordered">
-          <tr>
-            <th colspan="2">
-              {result.e}
-            </th>
-          </tr>
-          <tr>
-            <td colspan="2">
-              {#if result.a}
-                <img
-                  src={"image/" + result.i}
-                  alt={result.c}
-                  on:click={() =>
-                    window.open(
-                      `https://gamewith.jp/uma-musume/article/show/${result.a}`
-                    )}
-                />
-              {/if}
-              {#if result.t == "m"}
-                {result.c}/メインシナリオイベント
-              {:else}
-                {result.c}/{result.t == "c" ? "ウマ娘" : "サポート"}/{result.r}
-              {/if}
-            </td>
-          </tr>
-          {#each result.o as option (option.b)}
+          <thead>
             <tr>
-              <td style="vertical-align:middle">
-                {option.b}
-              </td>
-              <td style="white-space:pre-line">
-                {@html addlink(option)}
+              <th colspan="2">
+                {result.e}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="2">
+                {#if result.a}
+                  <img
+                    src={"image/" + result.i}
+                    alt={result.c}
+                    on:click={() =>
+                      window.open(
+                        `https://gamewith.jp/uma-musume/article/show/${result.a}`
+                      )}
+                  />
+                {/if}
+                {#if result.t == "m"}
+                  {result.c}
+                  /
+                  メインシナリオイベント
+                {:else}
+                  {result.c}
+                  /
+                  {result.t == "c" ? "ウマ娘" : "サポート"}
+                  /
+                  {result.r}
+                {/if}
               </td>
             </tr>
-          {/each}
+            {#each result.o as option (option.b)}
+              <tr>
+                <td style="vertical-align:middle">
+                  {option.b}
+                </td>
+                <td style="white-space:pre-line">
+                  {@html addlink(option)}
+                </td>
+              </tr>
+            {/each}
+          </tbody>
         </table>
       {/each}
     </div>
@@ -131,6 +143,11 @@
     color: grey;
     font-size: 14px;
     padding-bottom: 1rem !important;
+  }
+
+  #results {
+    height: calc(100% - 91px);
+    overflow-y: overlay;
   }
 
   table {
