@@ -86,27 +86,28 @@
           <tbody>
             <tr>
               <td colspan="2">
-                {#if result.a}
-                  <img
-                    src={"image/" + result.i}
-                    alt={result.c}
-                    on:click={() =>
-                      window.open(
-                        `https://gamewith.jp/uma-musume/article/show/${result.a}`
-                      )}
-                  />
-                {/if}
-                {#if result.t == "m"}
-                  {result.c}
-                  /
-                  メインシナリオイベント
-                {:else}
-                  {result.c}
-                  /
-                  {result.t == "c" ? "ウマ娘" : "サポート"}
-                  /
-                  {result.r}
-                {/if}
+                <div style="display:flex">
+                  {#if result.a}
+                    <img
+                      src={"image/" + result.i}
+                      alt={result.c}
+                      on:click={() =>
+                        window.open(
+                          `https://gamewith.jp/uma-musume/article/show/${result.a}`
+                        )}
+                    />
+                  {/if}
+                  <div style="display:grid">
+                    {#if result.t == "m"}
+                      <span>{result.c}</span>
+                      <span>メインシナリオイベント</span>
+                    {:else}
+                      <span>{result.c}</span>
+                      <span>{result.t == "c" ? "ウマ娘" : "サポート"}</span>
+                      <span>{result.r}</span>
+                    {/if}
+                  </div>
+                </div>
               </td>
             </tr>
             {#each result.o as option (option.b)}
