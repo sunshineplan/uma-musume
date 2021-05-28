@@ -28,17 +28,15 @@
   <div class="info">
     <div>
       <h5>フィルタ:</h5>
-      {#if $filter.name}
-        <div class="button">
-          <button
-            class="btn-close"
-            on:click={() => {
-              if (window.innerWidth <= 767) showFilter.off();
-              $filter = { type: "character", name: "", image: "" };
-            }}
-          />
-        </div>
-      {/if}
+      <div class="button" class:hidden={$filter.name == ""}>
+        <button
+          class="btn-close"
+          on:click={() => {
+            if (window.innerWidth <= 767) showFilter.off();
+            $filter = { type: "character", name: "", image: "" };
+          }}
+        />
+      </div>
     </div>
     <div class="display">
       {#if !$filter.name}
@@ -188,6 +186,10 @@
     border-radius: 5px;
   }
 
+  .button.hidden {
+    visibility: hidden;
+  }
+
   .btn-close {
     box-sizing: content-box;
     width: 1em;
@@ -226,7 +228,7 @@
   }
 
   .items {
-    height: calc(100% - 204px);
+    height: calc(100% - 206px);
     text-align: center;
   }
 
