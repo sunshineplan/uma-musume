@@ -95,11 +95,13 @@ func main() {
 }
 
 func fetchData(data bool) error {
-	url := "https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/uma_event_datas.js"
-
-	src := gohttp.Get(url, nil).String()
-	src = strings.ReplaceAll(src, "const", "var")
-
+	src := strings.ReplaceAll(
+		gohttp.Get(
+			"https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js", nil,
+		).String(),
+		"const",
+		"var",
+	)
 	if _, err := vm.Run(src); err != nil {
 		return err
 	}
@@ -112,11 +114,22 @@ func fetchData(data bool) error {
 		return nil
 	}
 
-	if err := export("eventDatas", &eventDatas); err != nil {
+	if err := export("linkDatas", &linkDatas); err != nil {
 		return err
 	}
 
-	if err := export("linkDatas", &linkDatas); err != nil {
+	src = strings.ReplaceAll(
+		gohttp.Get(
+			"https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", nil,
+		).String(),
+		"window.eventDatas['男']",
+		"var eventDatas",
+	)
+	if _, err := vm.Run(src); err != nil {
+		return err
+	}
+
+	if err := export("eventDatas", &eventDatas); err != nil {
 		return err
 	}
 
