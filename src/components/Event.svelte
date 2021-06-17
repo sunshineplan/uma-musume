@@ -87,14 +87,16 @@
             <tr>
               <td colspan="2">
                 <div style="display:flex">
-                  {#if result.a}
+                  {#if result.a || result.i}
                     <img
-                      src={"image/" + result.i}
+                      src={result.i ? "image/" + result.i : ""}
                       alt={result.c}
-                      on:click={() =>
-                        window.open(
-                          `https://gamewith.jp/uma-musume/article/show/${result.a}`
-                        )}
+                      on:click={() => {
+                        if (result.a)
+                          window.open(
+                            `https://gamewith.jp/uma-musume/article/show/${result.a}`
+                          );
+                      }}
                     />
                   {/if}
                   <div style="display:grid">
