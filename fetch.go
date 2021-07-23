@@ -135,9 +135,13 @@ func fetchData(data bool) error {
 
 	for _, e := range eventDatas {
 		if e.Type == "c" {
-			for _, image := range imageDatas.Character {
-				if e.Character == image.Name {
-					e.Image = image.Image
+			if e.Character == "共通" {
+				e.Image = "rijicho.png"
+			} else {
+				for _, image := range imageDatas.Character {
+					if e.Character == image.Name {
+						e.Image = image.Image
+					}
 				}
 			}
 		} else if e.Type == "s" {
@@ -203,7 +207,7 @@ func export(name string, dst interface{}) error {
 }
 
 func fetchImage() {
-	task := imgconv.New()
+	task := imgconv.NewOptions()
 	task.SetResize(72, 0, 0).SetFormat("png")
 
 	if err := os.MkdirAll("public/image", 0777); err != nil {
