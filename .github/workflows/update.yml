@@ -46,7 +46,7 @@ jobs:
         if: steps.check_update.outputs.new_data == 1
         run: |
           go run fetch.go image
-          npm i --no-package-lock
+          npm install
           npm run build
 
       - name: GitHub Pages Deploy
