@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -8,8 +9,12 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
-	"github.com/robertkrimen/otto"
+	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/cdproto/fetch"
+	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/gohttp"
 	"github.com/sunshineplan/imgconv"
 )
@@ -60,8 +65,6 @@ var imageDatas struct {
 	Character []image `json:"chara"`
 }
 
-var vm = otto.New()
-
 func main() {
 	flag.Parse()
 
@@ -85,8 +88,10 @@ func main() {
 		return
 	}
 
-	if err := fetchData(data); err != nil {
-		log.Fatal(err)
+	if data {
+		if err := fetchData(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if image {
@@ -94,42 +99,61 @@ func main() {
 	}
 }
 
-func fetchData(data bool) error {
-	src := strings.ReplaceAll(
-		gohttp.Get(
-			"https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js", nil,
-		).String(),
-		"const",
-		"var",
-	)
-	if _, err := vm.Run(src); err != nil {
+// https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js
+// https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js
+func fetchData() error {
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+
+	var id network.RequestID
+	done := make(chan bool)
+	chromedp.ListenTarget(ctx, func(v interface{}) {
+		switch ev := v.(type) {
+		case *network.EventRequestWillBeSent:
+			if strings.Contains(ev.Request.URL, "male_event_datas.js") {
+				id = ev.RequestID
+			}
+		case *network.EventLoadingFinished:
+			if ev.RequestID == id {
+				close(done)
+			}
+		case *fetch.EventRequestPaused:
+			go func() {
+				c := chromedp.FromContext(ctx)
+				ctx := cdp.WithExecutor(ctx, c.Target)
+
+				if (ev.ResourceType == network.ResourceTypeDocument ||
+					ev.ResourceType == network.ResourceTypeScript ||
+					ev.ResourceType == network.ResourceTypeXHR) &&
+					strings.Contains(ev.Request.URL, "gamewith") &&
+					!strings.Contains(ev.Request.URL, "ad/index.") {
+					fetch.ContinueRequest(ev.RequestID).Do(ctx)
+				} else {
+					fetch.FailRequest(ev.RequestID, network.ErrorReasonBlockedByClient).Do(ctx)
+				}
+			}()
+		}
+	})
+
+	if err := chromedp.Run(
+		ctx,
+		fetch.Enable(),
+		chromedp.Navigate("https://gamewith.jp/uma-musume/article/show/259587"),
+	); err != nil {
 		return err
 	}
 
-	if err := export("imageDatas", &imageDatas); err != nil {
-		return err
-	}
+	<-done
 
-	if !data {
-		return nil
-	}
-
-	if err := export("linkDatas", &linkDatas); err != nil {
-		return err
-	}
-
-	src = strings.ReplaceAll(
-		gohttp.Get(
-			"https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", nil,
-		).String(),
-		"window.eventDatas['男']",
-		"var eventDatas",
-	)
-	if _, err := vm.Run(src); err != nil {
-		return err
-	}
-
-	if err := export("eventDatas", &eventDatas); err != nil {
+	if err := chromedp.Run(
+		ctx,
+		chromedp.Evaluate("imageDatas", &imageDatas),
+		chromedp.Evaluate("linkDatas", &linkDatas),
+		chromedp.Evaluate("eventDatas['男']", &eventDatas),
+	); err != nil {
 		return err
 	}
 
@@ -172,38 +196,7 @@ func fetchData(data bool) error {
 		return err
 	}
 
-	f, err := os.Create("uma.json")
-	if err != nil {
-		return err
-	}
-	if _, err := f.Write(b); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func export(name string, dst interface{}) error {
-	value, err := vm.Get(name)
-	if err != nil {
-		return err
-	}
-
-	if value.IsUndefined() {
-		return errors.New("undefined value")
-	}
-
-	v, err := value.Export()
-	if err != nil {
-		return err
-	}
-
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(b, dst)
+	return os.WriteFile("uma.json", b, 0777)
 }
 
 func fetchImage() {
