@@ -80,18 +80,14 @@ func main() {
 		case "image":
 			image = true
 		default:
-			log.Println("Argument:", flag.Arg(0))
-			return
+			log.Fatalln("Argument:", flag.Arg(0))
 		}
 	default:
-		log.Println("Arguments:", strings.Join(flag.Args(), " "))
-		return
+		log.Fatalln("Arguments:", strings.Join(flag.Args(), " "))
 	}
 
-	if data {
-		if err := fetchData(); err != nil {
-			log.Fatal(err)
-		}
+	if err := fetchData(data); err != nil {
+		log.Fatal(err)
 	}
 
 	if image {
@@ -101,7 +97,7 @@ func main() {
 
 // https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js
 // https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js
-func fetchData() error {
+func fetchData(data bool) error {
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
@@ -155,6 +151,10 @@ func fetchData() error {
 		chromedp.Evaluate("eventDatas['男']", &eventDatas),
 	); err != nil {
 		return err
+	}
+
+	if !data {
+		return nil
 	}
 
 	for _, e := range eventDatas {
