@@ -165,6 +165,10 @@
     margin: auto;
   }
 
+  tbody {
+    border-width; 0 !important;
+  }
+
   img {
     width: 72px;
     max-width: 72px;
