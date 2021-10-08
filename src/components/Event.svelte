@@ -166,7 +166,7 @@
   }
 
   tbody {
-    border-width; 0 !important;
+    border-width: 0 !important;
   }
 
   img {
