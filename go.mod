@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/chromedp/cdproto v0.0.0-20211126220118-81fa0469ad77
 	github.com/chromedp/chromedp v0.7.6
-	github.com/sunshineplan/gohttp v1.0.3
+	github.com/sunshineplan/gohttp v1.0.4
 	github.com/sunshineplan/imgconv v1.0.2
 )
 
