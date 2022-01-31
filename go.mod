@@ -6,7 +6,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20211126220118-81fa0469ad77
 	github.com/chromedp/chromedp v0.7.6
 	github.com/sunshineplan/gohttp v1.0.4
-	github.com/sunshineplan/imgconv v1.0.3
+	github.com/sunshineplan/imgconv v1.0.5
 )
 
 require (
@@ -21,8 +21,8 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pdfcpu/pdfcpu v0.3.13 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/sunshineplan/pdf v1.0.1 // indirect
-	github.com/sunshineplan/tiff v0.0.0-20210710125142-3366bd152a12 // indirect
+	github.com/sunshineplan/pdf v1.0.2 // indirect
+	github.com/sunshineplan/tiff v0.0.0-20220128141034-29b9d69bd906 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/net v0.0.0-20211208000202-04296fa82e83 // indirect
 	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
