@@ -105,11 +105,12 @@ func fetchData(data bool) error {
 	defer cancel()
 
 	var id network.RequestID
-	done := make(chan bool)
+	done := make(chan struct{})
 	chromedp.ListenTarget(ctx, func(v interface{}) {
 		switch ev := v.(type) {
 		case *network.EventRequestWillBeSent:
 			if strings.Contains(ev.Request.URL, "male_event_datas.js") {
+				log.Println("Found:", ev.Request.URL)
 				id = ev.RequestID
 			}
 		case *network.EventLoadingFinished:
@@ -126,8 +127,10 @@ func fetchData(data bool) error {
 					ev.ResourceType == network.ResourceTypeXHR) &&
 					strings.Contains(ev.Request.URL, "gamewith") &&
 					!strings.Contains(ev.Request.URL, "ad/index.") {
+					log.Println("Allow:", ev.Request.URL)
 					fetch.ContinueRequest(ev.RequestID).Do(ctx)
 				} else {
+					//log.Println("Block:", ev.Request.URL)
 					fetch.FailRequest(ev.RequestID, network.ErrorReasonBlockedByClient).Do(ctx)
 				}
 			}()
@@ -142,7 +145,11 @@ func fetchData(data bool) error {
 		return err
 	}
 
-	<-done
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-done:
+	}
 
 	if err := chromedp.Run(
 		ctx,
@@ -158,7 +165,8 @@ func fetchData(data bool) error {
 	}
 
 	for _, e := range eventDatas {
-		if e.Type == "c" {
+		switch e.Type {
+		case "c":
 			if e.Character == "共通" {
 				e.Image = "rijicho.png"
 			} else {
@@ -168,7 +176,11 @@ func fetchData(data bool) error {
 					}
 				}
 			}
-		} else if e.Type == "s" {
+		case "m":
+			if e.Character == "クライマックス" {
+				e.Image = "climax.png"
+			}
+		case "s":
 			for _, image := range imageDatas.Support {
 				if e.Character == image.Name && e.Rare == image.Rare {
 					e.Image = image.Image

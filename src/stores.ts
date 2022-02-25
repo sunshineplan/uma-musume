@@ -1,4 +1,5 @@
-import { Writable, Readable, writable, derived } from 'svelte/store'
+import type { Writable, Readable } from 'svelte/store'
+import { writable, derived } from 'svelte/store'
 import _uma from '../uma.json'
 
 export interface Event {
@@ -42,6 +43,7 @@ const uma = _uma as Event[]
 
 export const characters: (FilterTypeRegistry['character'] & { image: string })[] =
   Array.from(uma.filter(event => event.t == 'c'), i => { return { name: i.c, image: i.i } })
+    .concat(Array.from(uma.filter(event => event.t == 'm'), i => { return { name: i.c, image: i.i } }))
     .filter((obj, index, arr) => arr.findIndex(i => (i.name == obj.name)) == index)
 
 export const filter: Writable<Filter<FilterType>> = writable({ type: 'character', name: '', image: '' })
@@ -52,7 +54,7 @@ export const events: Readable<Event[]> = derived(filter, $filter => {
   let events: Event[] = []
   if ($filter.name) {
     if ($filter.type == 'character')
-      events = uma.filter(event => event.t == 'c' && event.c == $filter.name)
+      events = uma.filter(event => (event.t == 'c' || event.t == 'm') && event.c == $filter.name)
     else if ($filter.type == 'support')
       events = uma.filter(event => event.t == 's' && event.c == $filter.name && event.r == $filter.rare)
   }
