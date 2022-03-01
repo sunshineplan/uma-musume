@@ -177,7 +177,12 @@ func fetchData(data bool) error {
 				}
 			}
 		case "m":
-			if e.Character == "クライマックス" {
+			switch e.Character {
+			case "URA":
+				e.Image = "ura.png"
+			case "アオハル":
+				e.Image = "aoharu.png"
+			case "クライマックス":
 				e.Image = "climax.png"
 			}
 		case "s":
