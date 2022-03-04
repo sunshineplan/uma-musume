@@ -89,7 +89,9 @@
                 <div style="display:flex">
                   {#if result.a || result.i}
                     <img
-                      src={result.i ? "https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/" + result.i : ""}
+                      src={result.i
+                        ? `https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/${result.i}`
+                        : ""}
                       alt={result.c}
                       on:click={() => {
                         if (result.a)

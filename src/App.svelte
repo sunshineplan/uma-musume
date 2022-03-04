@@ -14,7 +14,7 @@
     --filter: 289px;
   }
 
-  :global(body){
+  :global(body) {
     font-family: var(--bs-font-monospace);
   }
 </style>

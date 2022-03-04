@@ -19,11 +19,16 @@
       <span
         class:checked={$support.type == value}
         on:click={() => {
+          const div = document.getElementById("supports");
+          if (div) div.scrollTop = 0;
           if ($support.type == value) $support.type = undefined;
           else $support.type = value;
         }}
       >
-        <img src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{key}.webp" alt={key} />
+        <img
+          src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{key}.webp"
+          alt={key}
+        />
       </span>
     </li>
   {/each}
@@ -34,11 +39,16 @@
       <span
         class:checked={$support.rare == r.toUpperCase()}
         on:click={() => {
+          const div = document.getElementById("supports");
+          if (div) div.scrollTop = 0;
           if ($support.rare == r.toUpperCase()) $support.rare = undefined;
           else $support.rare = r.toUpperCase();
         }}
       >
-        <img src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{r}.webp" alt={r} />
+        <img
+          src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{r}.webp"
+          alt={r}
+        />
       </span>
     </li>
   {/each}
