@@ -31,7 +31,7 @@ interface FilterTypeRegistry {
 }
 
 interface Support {
-  type?: 'スピ' | 'スタ' | 'パワ' | '根性' | '賢さ' | '友人'
+  type?: 'スピ' | 'スタ' | 'パワ' | '根性' | '賢さ' | '友人' | 'グル'
   rare?: 'SSR' | 'SR' | 'R'
 }
 

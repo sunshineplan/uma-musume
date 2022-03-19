@@ -1,6 +1,7 @@
 <script>
   import { support } from "../stores";
 
+  //https://gametora.com/umamusume
   const type = {
     speed: "スピ",
     stamina: "スタ",
@@ -8,6 +9,7 @@
     guts: "根性",
     intelligence: "賢さ",
     friend: "友人",
+    group: "グル",
   };
 
   const rare = ["ssr", "sr", "r"];
