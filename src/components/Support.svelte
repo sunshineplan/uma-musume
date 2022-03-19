@@ -27,10 +27,7 @@
           else $support.type = value;
         }}
       >
-        <img
-          src="/support/{key}.png"
-          alt={key}
-        />
+        <img src="/support/{key}.png" alt={key} />
       </span>
     </li>
   {/each}
@@ -47,10 +44,7 @@
           else $support.rare = r.toUpperCase();
         }}
       >
-        <img
-          src="/support/{r}.png"
-          alt={r}
-        />
+        <img src="/support/{r}.png" alt={r} />
       </span>
     </li>
   {/each}

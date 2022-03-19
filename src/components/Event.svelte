@@ -89,9 +89,7 @@
                 <div style="display:flex">
                   {#if result.a || result.i}
                     <img
-                      src={result.i
-                        ? `/image/${result.i}`
-                        : ""}
+                      src={result.i ? `/image/${result.i}` : ""}
                       alt={result.c}
                       on:click={() => {
                         if (result.a)

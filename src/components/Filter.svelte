@@ -3,16 +3,9 @@
   import { characters, supports, filter, query, showFilter } from "../stores";
 
   let type = "character";
-  let hover = false;
 </script>
 
-<span
-  class="toggle"
-  class:on={$showFilter}
-  on:click={showFilter.switch}
-  on:mouseenter={() => (hover = true)}
-  on:mouseleave={() => (hover = false)}
->
+<span class="toggle" class:on={$showFilter} on:click={showFilter.switch}>
   <svg
     viewBox="0 0 16 16"
     width="32"
@@ -42,16 +35,10 @@
       {#if !$filter.name}
         <h5 style="color:gray">なし</h5>
       {:else if $filter.type == "character"}
-        <img
-          src="/image/{$filter.image}"
-          alt={$filter.name}
-        />
+        <img src="/image/{$filter.image}" alt={$filter.name} />
         <span>{$filter.name}</span>
       {:else if $filter.type == "support"}
-        <img
-          src="/image/{$filter.image}"
-          alt={$filter.name}
-        />
+        <img src="/image/{$filter.image}" alt={$filter.name} />
         <div style="display:grid">
           <span>{$filter.name}</span>
           <span>{$filter.rare}</span>
