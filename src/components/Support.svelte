@@ -26,7 +26,7 @@
         }}
       >
         <img
-          src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{key}.webp"
+          src="/support/{key}.png"
           alt={key}
         />
       </span>
@@ -46,7 +46,7 @@
         }}
       >
         <img
-          src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{r}.webp"
+          src="/support/{r}.png"
           alt={r}
         />
       </span>

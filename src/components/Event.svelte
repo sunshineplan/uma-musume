@@ -90,7 +90,7 @@
                   {#if result.a || result.i}
                     <img
                       src={result.i
-                        ? `https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/${result.i}`
+                        ? `/image/${result.i}`
                         : ""}
                       alt={result.c}
                       on:click={() => {
