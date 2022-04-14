@@ -35,10 +35,10 @@
       {#if !$filter.name}
         <h5 style="color:gray">なし</h5>
       {:else if $filter.type == "character"}
-        <img src="/image/{$filter.image}" alt={$filter.name} />
+        <img src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/{$filter.image}" alt={$filter.name} />
         <span>{$filter.name}</span>
       {:else if $filter.type == "support"}
-        <img src="/image/{$filter.image}" alt={$filter.name} />
+        <img src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/{$filter.image}" alt={$filter.name} />
         <div style="display:grid">
           <span>{$filter.name}</span>
           <span>{$filter.rare}</span>
@@ -74,7 +74,7 @@
             <img
               class:selected={$filter.type == "character" &&
                 $filter.name == i.name}
-              src="/image/{i.image}"
+              src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/{i.image}"
               alt={i.name}
               title={i.name}
               style="height:72px"
@@ -104,7 +104,7 @@
               class:selected={$filter.type == "support" &&
                 $filter.name == i.name &&
                 $filter.rare == i.rare}
-              src="/image/{i.image}"
+              src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/image/{i.image}"
               alt={i.name}
               title={i.name}
               style="min-height:96px"

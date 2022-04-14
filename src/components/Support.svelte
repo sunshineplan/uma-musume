@@ -27,7 +27,7 @@
           else $support.type = value;
         }}
       >
-        <img src="/support/{key}.png" alt={key} />
+        <img src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{key}.png" alt={key} />
       </span>
     </li>
   {/each}
@@ -44,7 +44,7 @@
           else $support.rare = r.toUpperCase();
         }}
       >
-        <img src="/support/{r}.png" alt={r} />
+        <img src="https://cdn.jsdelivr.net/gh/sunshineplan/uma-musume@gh-pages/support/{r}.png" alt={r} />
       </span>
     </li>
   {/each}
