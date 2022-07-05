@@ -113,6 +113,10 @@ func (p *gamewith) fetchData(data bool) error {
 
 	var events []event
 	for _, e := range eventDatas {
+		if e.Article != "" {
+			e.Article = "https://gamewith.jp/uma-musume/article/show/" + e.Article
+		}
+
 		switch e.Type {
 		case "c":
 			if e.Character == "共通" {
@@ -148,7 +152,7 @@ func (p *gamewith) fetchData(data bool) error {
 			skills := re.FindAllStringSubmatch(o.Gain, -1)
 			for _, skill := range skills {
 				if article, ok := linkDatas[skill[1]]; ok {
-					e.Options[i].Skill[skill[1]] = article
+					e.Options[i].Skill[skill[1]] = "https://gamewith.jp/uma-musume/article/show/" + article
 				}
 			}
 		}

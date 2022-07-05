@@ -43,7 +43,7 @@
       Object.entries(option.s).forEach(([key, value]) => {
         result = result.replaceAll(
           `『${key}』`,
-          `<a href="https://gamewith.jp/uma-musume/article/show/${value}" target="_blank">『${key}』</a>`
+          `<a href="${value}" target="_blank">『${key}』</a>`
         );
       });
     return result;
@@ -92,10 +92,7 @@
                       src={result.i ? `/image/${result.i}` : ""}
                       alt={result.c}
                       on:click={() => {
-                        if (result.a)
-                          window.open(
-                            `https://gamewith.jp/uma-musume/article/show/${result.a}`
-                          );
+                        if (result.a) window.open(result.a);
                       }}
                     />
                   {/if}
