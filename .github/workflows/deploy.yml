@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: |
           go mod download
-          go run fetch.go image
+          go run . image
           npm install
           npm run build
 

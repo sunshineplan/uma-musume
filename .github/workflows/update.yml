@@ -20,7 +20,7 @@ jobs:
         run: |
           go mod download
           go mod tidy
-          go run fetch.go data
+          go run . data
 
       - name: Check Update
         id: check_update
@@ -45,7 +45,7 @@ jobs:
       - name: Build
         if: steps.check_update.outputs.new_data == 1
         run: |
-          go run fetch.go image
+          go run . image
           npm install
           npm run build
 

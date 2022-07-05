@@ -4,22 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/chromedp/cdproto/cdp"
-	"github.com/chromedp/cdproto/fetch"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/gohttp"
 	"github.com/sunshineplan/imgconv"
 )
 
-type event struct {
+var _ provider = &gamewith{}
+
+type gamewithEvent struct {
 	Event     string `json:"e"`
 	Character string `json:"n"`
 	Type      string `json:"c"`
@@ -34,70 +34,24 @@ type event struct {
 	} `json:"choices"`
 }
 
-type realEvent struct {
-	Event     string `json:"e"`
-	Character string `json:"c"`
-	Type      string `json:"t"`
-	Rare      string `json:"r"`
-	Article   string `json:"a"`
-	Image     string `json:"i"`
-	Keyword   string `json:"k"`
-	Options   []struct {
-		Branch string            `json:"b"`
-		Gain   string            `json:"g"`
-		Skill  map[string]string `json:"s,omitempty"`
-	} `json:"o"`
-}
-
-type image struct {
-	Name  string `json:"n"`
-	Rare  string `json:"l"`
-	Type  string `json:"c"`
-	Image string `json:"i"`
-}
-
-var events []realEvent
-
-var eventDatas []event
-var linkDatas map[string]string
-var imageDatas struct {
-	Support   []image
-	Character []image `json:"chara"`
-}
-
-func main() {
-	flag.Parse()
-
-	var data, image bool
-	switch flag.NArg() {
-	case 0:
-		data = true
-		image = true
-	case 1:
-		switch flag.Arg(0) {
-		case "data":
-			data = true
-		case "image":
-			image = true
-		default:
-			log.Fatalln("Argument:", flag.Arg(0))
+type gamewith struct {
+	imageDatas struct {
+		Support []struct {
+			Name  string `json:"n"`
+			Rare  string `json:"l"`
+			Type  string `json:"c"`
+			Image string `json:"i"`
 		}
-	default:
-		log.Fatalln("Arguments:", strings.Join(flag.Args(), " "))
-	}
-
-	if err := fetchData(data); err != nil {
-		log.Fatal(err)
-	}
-
-	if image {
-		fetchImage()
+		Character []struct {
+			Name  string `json:"n"`
+			Rare  string `json:"l"`
+			Type  string `json:"c"`
+			Image string `json:"i"`
+		} `json:"chara"`
 	}
 }
 
-// https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js
-// https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js
-func fetchData(data bool) error {
+func (p *gamewith) fetchData(data bool) error {
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
@@ -110,38 +64,29 @@ func fetchData(data bool) error {
 		switch ev := v.(type) {
 		case *network.EventRequestWillBeSent:
 			if strings.Contains(ev.Request.URL, "male_event_datas.js") {
-				log.Println("Found:", ev.Request.URL)
 				id = ev.RequestID
 			}
 		case *network.EventLoadingFinished:
 			if ev.RequestID == id {
 				close(done)
 			}
-		case *fetch.EventRequestPaused:
-			go func() {
-				c := chromedp.FromContext(ctx)
-				ctx := cdp.WithExecutor(ctx, c.Target)
-
-				if (ev.ResourceType == network.ResourceTypeDocument ||
-					ev.ResourceType == network.ResourceTypeScript ||
-					ev.ResourceType == network.ResourceTypeXHR) &&
-					strings.Contains(ev.Request.URL, "gamewith") &&
-					!strings.Contains(ev.Request.URL, "ad/index.") {
-					log.Println("Allow:", ev.Request.URL)
-					fetch.ContinueRequest(ev.RequestID).Do(ctx)
-				} else {
-					//log.Println("Block:", ev.Request.URL)
-					fetch.FailRequest(ev.RequestID, network.ErrorReasonBlockedByClient).Do(ctx)
-				}
-			}()
 		}
 	})
 
-	if err := chromedp.Run(
-		ctx,
-		fetch.Enable(),
-		chromedp.Navigate("https://gamewith.jp/uma-musume/article/show/259587"),
-	); err != nil {
+	file, err := os.CreateTemp("", "*.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+
+	file.WriteString(`
+<meta charset="UTF-8">
+<script>eventDatas={}</script>
+<script src="https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js"></script>
+<script src="https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js"></script>`)
+	file.Close()
+
+	if err := chromedp.Run(ctx, chromedp.Navigate(fmt.Sprintf("file:///%s", file.Name()))); err != nil {
 		return err
 	}
 
@@ -151,9 +96,11 @@ func fetchData(data bool) error {
 	case <-done:
 	}
 
+	var eventDatas []gamewithEvent
+	var linkDatas map[string]string
 	if err := chromedp.Run(
 		ctx,
-		chromedp.Evaluate("imageDatas", &imageDatas),
+		chromedp.Evaluate("imageDatas", &p.imageDatas),
 		chromedp.Evaluate("linkDatas", &linkDatas),
 		chromedp.Evaluate("eventDatas['男']", &eventDatas),
 	); err != nil {
@@ -164,13 +111,14 @@ func fetchData(data bool) error {
 		return nil
 	}
 
+	var events []event
 	for _, e := range eventDatas {
 		switch e.Type {
 		case "c":
 			if e.Character == "共通" {
 				e.Image = "rijicho.png"
 			} else {
-				for _, image := range imageDatas.Character {
+				for _, image := range p.imageDatas.Character {
 					if e.Character == image.Name {
 						e.Image = image.Image
 					}
@@ -186,7 +134,7 @@ func fetchData(data bool) error {
 				e.Image = "climax.png"
 			}
 		case "s":
-			for _, image := range imageDatas.Support {
+			for _, image := range p.imageDatas.Support {
 				if e.Character == image.Name && e.Rare == image.Rare {
 					e.Image = image.Image
 				}
@@ -205,7 +153,7 @@ func fetchData(data bool) error {
 			}
 		}
 
-		events = append(events, realEvent(e))
+		events = append(events, event(e))
 	}
 
 	b, err := json.MarshalIndent(events, "", " ")
@@ -216,7 +164,7 @@ func fetchData(data bool) error {
 	return os.WriteFile("uma.json", b, 0777)
 }
 
-func fetchImage() {
+func (p *gamewith) fetchImage() error {
 	task := imgconv.NewOptions()
 	task.SetResize(72, 0, 0).SetFormat("png")
 
@@ -225,10 +173,10 @@ func fetchImage() {
 	}
 
 	images := make(map[string]bool)
-	for _, i := range imageDatas.Support {
+	for _, i := range p.imageDatas.Support {
 		images[i.Image] = true
 	}
-	for _, i := range imageDatas.Character {
+	for _, i := range p.imageDatas.Character {
 		images[i.Image] = true
 	}
 
@@ -239,9 +187,8 @@ func fetchImage() {
 			log.Println("downloading", url+i)
 
 			resp := gohttp.Get(url+i, nil)
-			if resp.Error != nil {
-				log.Print(resp.Error)
-				continue
+			if err := resp.Error; err != nil {
+				return err
 			}
 			defer resp.Body.Close()
 
@@ -265,4 +212,6 @@ func fetchImage() {
 			log.Print(err)
 		}
 	}
+
+	return nil
 }
