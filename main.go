@@ -33,15 +33,14 @@ func main() {
 		if err = p.fetchData(data); err != nil {
 			log.Print(err)
 			continue
-		} else {
-			if image {
-				if err = p.fetchImage(); err != nil {
-					log.Print(err)
-				} else {
-					break
-				}
+		}
+		if image {
+			if err = p.fetchImage(); err != nil {
+				log.Print(err)
+				continue
 			}
 		}
+		break
 	}
 	if err != nil {
 		os.Exit(1)
