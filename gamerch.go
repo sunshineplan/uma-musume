@@ -160,7 +160,7 @@ func (p *gamerch) fetchImage() error {
 			continue
 		}
 
-		if err := downloadImage(image.Image, fmt.Sprintf("public/image/%d.png", id)); err != nil {
+		if err := downloadImage(image.Image, fmt.Sprintf("public/image/%d.png", id), nil); err != nil {
 			return err
 		}
 	}

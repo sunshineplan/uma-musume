@@ -37,13 +37,13 @@ type option struct {
 	Skill  map[string]string `json:"s,omitempty"`
 }
 
-var image = imgconv.NewOptions()
+var defaultConverter = imgconv.NewOptions().SetResize(72, 0, 0).SetFormat(imgconv.PNG)
 
-func init() {
-	image.SetResize(72, 0, 0).SetFormat("png")
-}
+func downloadImage(url, path string, converter *imgconv.Options) error {
+	if converter == nil {
+		converter = defaultConverter
+	}
 
-func downloadImage(url, path string) error {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		log.Println("downloading", url)
 
@@ -66,7 +66,7 @@ func downloadImage(url, path string) error {
 		}
 		defer f.Close()
 
-		if err := image.Convert(f, img); err != nil {
+		if err := converter.Convert(f, img); err != nil {
 			log.Print(err)
 		}
 	} else if err != nil {

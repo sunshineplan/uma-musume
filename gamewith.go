@@ -179,7 +179,7 @@ func (p *gamewith) fetchImage() error {
 	}
 
 	for i := range images {
-		if err := downloadImage("https://img.gamewith.jp/article_tools/uma-musume/gacha/"+i, "public/image/"+i); err != nil {
+		if err := downloadImage("https://img.gamewith.jp/article_tools/uma-musume/gacha/"+i, "public/image/"+i, nil); err != nil {
 			return err
 		}
 	}
