@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -31,24 +29,26 @@ type gamewithEvent struct {
 	} `json:"choices"`
 }
 
-type gamewith struct {
-	imageDatas struct {
-		Support []struct {
-			Name  string `json:"n"`
-			Rare  string `json:"l"`
-			Type  string `json:"c"`
-			Image string `json:"i"`
-		}
-		Character []struct {
-			Name  string `json:"n"`
-			Rare  string `json:"l"`
-			Type  string `json:"c"`
-			Image string `json:"i"`
-		} `json:"chara"`
+type gamewithImages struct {
+	Support []struct {
+		Name  string `json:"n"`
+		Rare  string `json:"l"`
+		Type  string `json:"c"`
+		Image string `json:"i"`
 	}
+	Character []struct {
+		Name  string `json:"n"`
+		Rare  string `json:"l"`
+		Type  string `json:"c"`
+		Image string `json:"i"`
+	} `json:"chara"`
 }
 
-func (p *gamewith) fetchData(data bool) error {
+type gamewith struct {
+	data map[string]string
+}
+
+func (p *gamewith) events(process bool) (events []event, err error) {
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
@@ -72,7 +72,7 @@ func (p *gamewith) fetchData(data bool) error {
 
 	file, err := os.CreateTemp("", "*.html")
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	defer os.Remove(file.Name())
 
@@ -83,32 +83,41 @@ func (p *gamewith) fetchData(data bool) error {
 <script src="https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js"></script>`)
 	file.Close()
 
-	if err := chromedp.Run(ctx, chromedp.Navigate(fmt.Sprintf("file:///%s", file.Name()))); err != nil {
-		return err
+	if err = chromedp.Run(ctx, chromedp.Navigate(fmt.Sprintf("file:///%s", file.Name()))); err != nil {
+		return
 	}
 
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		err = ctx.Err()
+		return
 	case <-done:
 	}
 
+	var imageDatas gamewithImages
 	var eventDatas []gamewithEvent
 	var linkDatas map[string]string
-	if err := chromedp.Run(
+	if err = chromedp.Run(
 		ctx,
-		chromedp.Evaluate("imageDatas", &p.imageDatas),
+		chromedp.Evaluate("imageDatas", &imageDatas),
 		chromedp.Evaluate("linkDatas", &linkDatas),
 		chromedp.Evaluate("eventDatas['男']", &eventDatas),
 	); err != nil {
-		return err
+		return
 	}
 
-	if !data {
-		return nil
+	p.data = make(map[string]string)
+	for _, i := range imageDatas.Support {
+		p.data[i.Name+i.Rare] = i.Image
+	}
+	for _, i := range imageDatas.Character {
+		p.data[i.Name] = i.Image
 	}
 
-	var events []event
+	if !process {
+		return
+	}
+
 	for _, e := range eventDatas {
 		if e.Article != "" {
 			e.Article = "https://gamewith.jp/uma-musume/article/show/" + e.Article
@@ -119,11 +128,7 @@ func (p *gamewith) fetchData(data bool) error {
 			if e.Character == "共通" {
 				e.Image = "rijicho.png"
 			} else {
-				for _, image := range p.imageDatas.Character {
-					if e.Character == image.Name {
-						e.Image = image.Image
-					}
-				}
+				e.Image = p.data[e.Character]
 			}
 		case "m":
 			switch e.Character {
@@ -135,11 +140,7 @@ func (p *gamewith) fetchData(data bool) error {
 				e.Image = "climax.png"
 			}
 		case "s":
-			for _, image := range p.imageDatas.Support {
-				if e.Character == image.Name && e.Rare == image.Rare {
-					e.Image = image.Image
-				}
-			}
+			e.Image = p.data[e.Character+e.Rare]
 		}
 
 		for i, o := range e.Options {
@@ -157,28 +158,11 @@ func (p *gamewith) fetchData(data bool) error {
 		events = append(events, event(e))
 	}
 
-	b, err := json.MarshalIndent(events, "", " ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile("uma.json", b, 0777)
+	return
 }
 
-func (p *gamewith) fetchImage() error {
-	if err := os.MkdirAll("public/image", 0777); err != nil {
-		log.Fatal(err)
-	}
-
-	images := make(map[string]bool)
-	for _, i := range p.imageDatas.Support {
-		images[i.Image] = true
-	}
-	for _, i := range p.imageDatas.Character {
-		images[i.Image] = true
-	}
-
-	for i := range images {
+func (p *gamewith) images() error {
+	for _, i := range p.data {
 		if err := downloadImage("https://img.gamewith.jp/article_tools/uma-musume/gacha/"+i, "public/image/"+i, nil); err != nil {
 			return err
 		}

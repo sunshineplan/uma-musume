@@ -10,15 +10,15 @@ import (
 func main() {
 	flag.Parse()
 
-	var data, image bool
+	var json, image bool
 	switch flag.NArg() {
 	case 0:
-		data = true
+		json = true
 		image = true
 	case 1:
 		switch flag.Arg(0) {
-		case "data":
-			data = true
+		case "json":
+			json = true
 		case "image":
 			image = true
 		default:
@@ -28,14 +28,25 @@ func main() {
 		log.Fatalln("Arguments:", strings.Join(flag.Args(), " "))
 	}
 
+	var events []event
 	var err error
 	for _, p := range providers {
-		if err = p.fetchData(data); err != nil {
+		events, err = p.events(json)
+		if err != nil {
 			log.Print(err)
 			continue
 		}
+		if json {
+			if err = exportEvents(events); err != nil {
+				log.Fatal(err)
+			}
+		}
 		if image {
-			if err = p.fetchImage(); err != nil {
+			if err := os.MkdirAll("public/image", 0777); err != nil {
+				log.Fatal(err)
+			}
+
+			if err = p.images(); err != nil {
 				log.Print(err)
 				continue
 			}

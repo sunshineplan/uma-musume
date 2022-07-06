@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -14,59 +12,62 @@ import (
 
 var _ provider = &gamerch{}
 
-type gamerch struct {
-	data map[int]info
+type gamerchEvents struct {
+	Cards []struct {
+		ID      int `json:"entry_id"`
+		Image   string
+		Name    string
+		Rarity  string
+		Support string
+		Type    int
+	}
+	Events []struct {
+		ID      int `json:"entry_id"`
+		Type    int
+		Title   string
+		Choices []struct {
+			Name    string
+			Affects string
+		}
+	}
+	Skills []struct {
+		ID   int `json:"entry_id"`
+		Name string
+	}
 }
 
-type info struct {
+type gamerchImage struct {
 	Name  string
 	Rare  string
 	Type  string
 	Image string
 }
 
-func (p *gamerch) fetchData(data bool) error {
-	var res struct {
-		Cards []struct {
-			ID      int `json:"entry_id"`
-			Image   string
-			Name    string
-			Rarity  string
-			Support string
-			Type    int
-		}
-		Events []struct {
-			ID      int `json:"entry_id"`
-			Type    int
-			Title   string
-			Choices []struct {
-				Name    string
-				Affects string
-			}
-		}
-		Skills []struct {
-			ID    int `json:"entry_id"`
-			Image string
-			Name  string
-		}
-	}
+type gamerch struct {
+	data map[int]gamerchImage
+}
+
+func (p *gamerch) events(process bool) (events []event, err error) {
+	// https://gamerch.com/umamusume/event-checker
 	resp, err := http.Get("https://cdn.gamerch.com/contents/plugin/umamusume/events-1656579751.json")
 	if err != nil {
-		return err
+		return
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(b, &res); err != nil {
-		return err
+		return
 	}
 
-	p.data = make(map[int]info)
+	var res gamerchEvents
+	if err = json.Unmarshal(b, &res); err != nil {
+		return
+	}
+
+	p.data = make(map[int]gamerchImage)
 	for _, i := range res.Cards {
-		image := info{i.Name, "", "", i.Image}
+		image := gamerchImage{i.Name, "", "", i.Image}
 		if i.Type == 2 {
 			image.Rare = i.Rarity
 			image.Type = i.Support
@@ -74,11 +75,10 @@ func (p *gamerch) fetchData(data bool) error {
 		p.data[i.ID] = image
 	}
 
-	if !data {
-		return nil
+	if !process {
+		return
 	}
 
-	var events []event
 	for _, e := range res.Events {
 		if len(e.Choices) == 1 {
 			continue
@@ -142,19 +142,10 @@ func (p *gamerch) fetchData(data bool) error {
 		return events[i].Article < events[j].Article
 	})
 
-	b, err = json.MarshalIndent(events, "", " ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile("uma.json", b, 0777)
+	return
 }
 
-func (p *gamerch) fetchImage() error {
-	if err := os.MkdirAll("public/image", 0777); err != nil {
-		log.Fatal(err)
-	}
-
+func (p *gamerch) images() error {
 	for id, image := range p.data {
 		if image.Image == "" {
 			continue

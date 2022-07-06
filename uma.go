@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -10,8 +11,8 @@ import (
 )
 
 type provider interface {
-	fetchData(bool) error
-	fetchImage() error
+	events(bool) ([]event, error)
+	images() error
 }
 
 var providers = []provider{&gamewith{}, &gamerch{}}
@@ -35,6 +36,15 @@ type option struct {
 	Branch string            `json:"b"`
 	Gain   string            `json:"g"`
 	Skill  map[string]string `json:"s,omitempty"`
+}
+
+func exportEvents(events []event) error {
+	b, err := json.MarshalIndent(events, "", " ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile("uma.json", b, 0777)
 }
 
 var defaultConverter = imgconv.NewOptions().SetResize(72, 0, 0).SetFormat(imgconv.PNG)
