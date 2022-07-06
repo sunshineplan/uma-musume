@@ -28,6 +28,12 @@ type event struct {
 	} `json:"o"`
 }
 
+type option struct {
+	Branch string            `json:"b"`
+	Gain   string            `json:"g"`
+	Skill  map[string]string `json:"s,omitempty"`
+}
+
 func main() {
 	flag.Parse()
 
@@ -50,7 +56,7 @@ func main() {
 	}
 
 	if _, err := executor.ExecuteSerial(
-		[]provider{&gamewith{}},
+		[]provider{&gamewith{}, &gamerch{}},
 		func(p provider) (any, error) {
 			if err := p.fetchData(data); err != nil {
 				return nil, err
@@ -63,5 +69,4 @@ func main() {
 	); err != nil {
 		log.Fatal(err)
 	}
-
 }
