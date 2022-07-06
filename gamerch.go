@@ -2,16 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
-
-	"github.com/sunshineplan/gohttp"
-	"github.com/sunshineplan/imgconv"
 )
 
 var _ provider = &gamerch{}
@@ -28,7 +26,7 @@ type info struct {
 }
 
 func (p *gamerch) fetchData(data bool) error {
-	var resp struct {
+	var res struct {
 		Cards []struct {
 			ID      int `json:"entry_id"`
 			Image   string
@@ -52,12 +50,22 @@ func (p *gamerch) fetchData(data bool) error {
 			Name  string
 		}
 	}
-	if err := gohttp.Get("https://cdn.gamerch.com/contents/plugin/umamusume/events-1656579751.json", nil).JSON(&resp); err != nil {
+	resp, err := http.Get("https://cdn.gamerch.com/contents/plugin/umamusume/events-1656579751.json")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &res); err != nil {
 		return err
 	}
 
 	p.data = make(map[int]info)
-	for _, i := range resp.Cards {
+	for _, i := range res.Cards {
 		image := info{i.Name, "", "", i.Image}
 		if i.Type == 2 {
 			image.Rare = i.Rarity
@@ -71,7 +79,7 @@ func (p *gamerch) fetchData(data bool) error {
 	}
 
 	var events []event
-	for _, e := range resp.Events {
+	for _, e := range res.Events {
 		if len(e.Choices) == 1 {
 			continue
 		}
@@ -113,7 +121,7 @@ func (p *gamerch) fetchData(data bool) error {
 			re := regexp.MustCompile(`「(.+?)」`)
 			skills := re.FindAllStringSubmatch(choice.Affects, -1)
 			for _, skill := range skills {
-				for _, s := range resp.Skills {
+				for _, s := range res.Skills {
 					if strings.HasPrefix(skill[1], s.Name) {
 						choice.Affects = strings.ReplaceAll(choice.Affects, skill[0], "『"+skill[1]+"』")
 						m[skill[1]] = fmt.Sprint("https://gamerch.com/umamusume/entry/", s.ID)
@@ -134,7 +142,7 @@ func (p *gamerch) fetchData(data bool) error {
 		return events[i].Article < events[j].Article
 	})
 
-	b, err := json.MarshalIndent(events, "", " ")
+	b, err = json.MarshalIndent(events, "", " ")
 	if err != nil {
 		return err
 	}
@@ -143,9 +151,6 @@ func (p *gamerch) fetchData(data bool) error {
 }
 
 func (p *gamerch) fetchImage() error {
-	task := imgconv.NewOptions()
-	task.SetResize(72, 0, 0).SetFormat("png")
-
 	if err := os.MkdirAll("public/image", 0777); err != nil {
 		log.Fatal(err)
 	}
@@ -155,34 +160,8 @@ func (p *gamerch) fetchImage() error {
 			continue
 		}
 
-		path := fmt.Sprintf("public/image/%d.png", id)
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			log.Println("downloading", image.Image)
-
-			resp := gohttp.Get(image.Image, nil)
-			if err := resp.Error; err != nil {
-				return err
-			}
-			defer resp.Body.Close()
-
-			img, err := imgconv.Decode(resp.Body)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-
-			f, err := os.Create(path)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			defer f.Close()
-
-			if err := task.Convert(f, img); err != nil {
-				log.Print(err)
-			}
-		} else if err != nil {
-			log.Print(err)
+		if err := downloadImage(image.Image, fmt.Sprintf("public/image/%d.png", id)); err != nil {
+			return err
 		}
 	}
 

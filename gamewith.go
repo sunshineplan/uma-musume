@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,8 +12,6 @@ import (
 
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
-	"github.com/sunshineplan/gohttp"
-	"github.com/sunshineplan/imgconv"
 )
 
 var _ provider = &gamewith{}
@@ -169,9 +166,6 @@ func (p *gamewith) fetchData(data bool) error {
 }
 
 func (p *gamewith) fetchImage() error {
-	task := imgconv.NewOptions()
-	task.SetResize(72, 0, 0).SetFormat("png")
-
 	if err := os.MkdirAll("public/image", 0777); err != nil {
 		log.Fatal(err)
 	}
@@ -184,36 +178,9 @@ func (p *gamewith) fetchImage() error {
 		images[i.Image] = true
 	}
 
-	url := "https://img.gamewith.jp/article_tools/uma-musume/gacha/"
 	for i := range images {
-		path := "public/image/" + i
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			log.Println("downloading", url+i)
-
-			resp := gohttp.Get(url+i, nil)
-			if err := resp.Error; err != nil {
-				return err
-			}
-			defer resp.Body.Close()
-
-			img, err := imgconv.Decode(resp.Body)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-
-			f, err := os.Create(path)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			defer f.Close()
-
-			if err := task.Convert(f, img); err != nil {
-				log.Print(err)
-			}
-		} else {
-			log.Print(err)
+		if err := downloadImage("https://img.gamewith.jp/article_tools/uma-musume/gacha/"+i, "public/image/"+i); err != nil {
+			return err
 		}
 	}
 

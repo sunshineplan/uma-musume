@@ -1,17 +1,20 @@
 package main
 
 import (
-	"flag"
+	"errors"
 	"log"
-	"strings"
+	"net/http"
+	"os"
 
-	"github.com/sunshineplan/utils/executor"
+	"github.com/sunshineplan/imgconv"
 )
 
 type provider interface {
 	fetchData(bool) error
 	fetchImage() error
 }
+
+var providers = []provider{&gamewith{}, &gamerch{}}
 
 type event struct {
 	Event     string `json:"e"`
@@ -34,39 +37,41 @@ type option struct {
 	Skill  map[string]string `json:"s,omitempty"`
 }
 
-func main() {
-	flag.Parse()
+var image = imgconv.NewOptions()
 
-	var data, image bool
-	switch flag.NArg() {
-	case 0:
-		data = true
-		image = true
-	case 1:
-		switch flag.Arg(0) {
-		case "data":
-			data = true
-		case "image":
-			image = true
-		default:
-			log.Fatalln("Argument:", flag.Arg(0))
+func init() {
+	image.SetResize(72, 0, 0).SetFormat("png")
+}
+
+func downloadImage(url, path string) error {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		log.Println("downloading", url)
+
+		resp, err := http.Get(url)
+		if err != nil {
+			return err
 		}
-	default:
-		log.Fatalln("Arguments:", strings.Join(flag.Args(), " "))
+		defer resp.Body.Close()
+
+		img, err := imgconv.Decode(resp.Body)
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+
+		f, err := os.Create(path)
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+		defer f.Close()
+
+		if err := image.Convert(f, img); err != nil {
+			log.Print(err)
+		}
+	} else if err != nil {
+		log.Print(err)
 	}
 
-	if _, err := executor.ExecuteSerial(
-		[]provider{&gamewith{}, &gamerch{}},
-		func(p provider) (any, error) {
-			if err := p.fetchData(data); err != nil {
-				return nil, err
-			}
-			if image {
-				return nil, p.fetchImage()
-			}
-			return nil, nil
-		},
-	); err != nil {
-		log.Fatal(err)
-	}
+	return nil
 }
