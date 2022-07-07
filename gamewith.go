@@ -44,9 +44,12 @@ type gamewithImages struct {
 	} `json:"chara"`
 }
 
+// https://gamewith.jp/uma-musume/article/show/259587
 type gamewith struct {
 	data map[string]string
 }
+
+func (p gamewith) name() string { return "GameWith" }
 
 func (p *gamewith) events(process bool) (events []event, err error) {
 	ctx, cancel := chromedp.NewContext(context.Background())

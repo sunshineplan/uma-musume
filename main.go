@@ -37,7 +37,7 @@ func main() {
 			continue
 		}
 		if json {
-			if err = exportEvents(events); err != nil {
+			if err = exportEvents(events, "uma.json"); err != nil {
 				log.Fatal(err)
 			}
 		}

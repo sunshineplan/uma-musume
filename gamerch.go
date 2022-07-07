@@ -43,12 +43,14 @@ type gamerchImage struct {
 	Image string
 }
 
+// https://gamerch.com/umamusume/event-checker
 type gamerch struct {
 	data map[int]gamerchImage
 }
 
+func (p gamerch) name() string { return "Gamerch" }
+
 func (p *gamerch) events(process bool) (events []event, err error) {
-	// https://gamerch.com/umamusume/event-checker
 	resp, err := http.Get("https://cdn.gamerch.com/contents/plugin/umamusume/events-1656579751.json")
 	if err != nil {
 		return

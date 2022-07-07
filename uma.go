@@ -11,6 +11,7 @@ import (
 )
 
 type provider interface {
+	name() string
 	events(bool) ([]event, error)
 	images() error
 }
@@ -38,13 +39,13 @@ type option struct {
 	Skill  map[string]string `json:"s,omitempty"`
 }
 
-func exportEvents(events []event) error {
+func exportEvents(events []event, filename string) error {
 	b, err := json.MarshalIndent(events, "", " ")
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile("uma.json", b, 0777)
+	return os.WriteFile(filename, b, 0777)
 }
 
 var defaultConverter = imgconv.NewOptions().SetResize(72, 0, 0).SetFormat(imgconv.PNG)
