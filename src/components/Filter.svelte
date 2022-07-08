@@ -98,12 +98,11 @@
     {:else}
       <Support />
       <div id="supports" class="list">
-        {#each $supports as i (i.name + i.rare)}
+        {#each $supports as i (i.image)}
           <li>
             <img
               class:selected={$filter.type == "support" &&
-                $filter.name == i.name &&
-                $filter.rare == i.rare}
+                $filter.image == i.image}
               src="/image/{i.image}"
               alt={i.name}
               title={i.name}
@@ -113,16 +112,10 @@
                 if (
                   $filter.name &&
                   ($filter.type == "character" ||
-                    ($filter.type == "support" &&
-                      $filter.name != i.name &&
-                      $filter.rare != i.rare))
+                    ($filter.type == "support" && $filter.image != i.image))
                 )
                   $query = "";
-                if (
-                  $filter.type == "support" &&
-                  $filter.name == i.name &&
-                  $filter.rare == i.rare
-                )
+                if ($filter.type == "support" && $filter.image == i.image)
                   $filter = { type: "support", name: "", image: "" };
                 else
                   $filter = {

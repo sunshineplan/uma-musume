@@ -56,7 +56,7 @@ export const events: Readable<Event[]> = derived(filter, $filter => {
     if ($filter.type == 'character')
       events = uma.filter(event => (event.t == 'c' || event.t == 'm') && event.c == $filter.name)
     else if ($filter.type == 'support')
-      events = uma.filter(event => event.t == 's' && event.c == $filter.name && event.r == $filter.rare)
+      events = uma.filter(event => event.t == 's' && event.i == $filter.image)
   }
   else events = uma
   events.sort((a, b) => {
@@ -73,7 +73,7 @@ export const events: Readable<Event[]> = derived(filter, $filter => {
 
 export const supports: Readable<(FilterTypeRegistry['support'] & { image: string })[]> = derived(support, $support => {
   let supports = Array.from(uma.filter(event => event.t == 's'), i => { return { name: i.c, rare: i.r, image: i.i } })
-    .filter((obj, index, arr) => arr.findIndex(i => (i.name == obj.name && i.rare == obj.rare)) == index)
+    .filter((obj, index, arr) => arr.findIndex(i => (i.image == obj.image)) == index)
   if ($support.type)
     supports = supports.filter(support => support.rare.includes($support.type as string))
   if ($support.rare)

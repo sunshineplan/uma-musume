@@ -16,7 +16,7 @@ type provider interface {
 	images() error
 }
 
-var providers = []provider{&gamewith{}, &gamerch{}}
+var providers = []provider{&gamewith{}, &gamerch{}, &kamigame{}}
 
 type event struct {
 	Event     string `json:"e"`

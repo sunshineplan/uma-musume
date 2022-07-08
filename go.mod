@@ -6,6 +6,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20220629234738-4cfc9cdeeb92
 	github.com/chromedp/chromedp v0.8.2
 	github.com/sunshineplan/imgconv v1.0.9
+	golang.org/x/exp v0.0.0-20220706164943-b4a6d9510983
 )
 
 require (

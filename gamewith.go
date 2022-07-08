@@ -149,9 +149,7 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 		for i, o := range e.Options {
 			e.Options[i].Gain = strings.ReplaceAll(o.Gain, "[br]", "\n")
 			e.Options[i].Skill = make(map[string]string)
-			re := regexp.MustCompile(`『(.+?)』`)
-			skills := re.FindAllStringSubmatch(o.Gain, -1)
-			for _, skill := range skills {
+			for _, skill := range regexp.MustCompile(`『(.+?)』`).FindAllStringSubmatch(o.Gain, -1) {
 				if article, ok := linkDatas[skill[1]]; ok {
 					e.Options[i].Skill[skill[1]] = "https://gamewith.jp/uma-musume/article/show/" + article
 				}

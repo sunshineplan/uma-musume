@@ -120,9 +120,7 @@ func (p *gamerch) events(process bool) (events []event, err error) {
 
 		for _, choice := range e.Choices {
 			m := make(map[string]string)
-			re := regexp.MustCompile(`「(.+?)」`)
-			skills := re.FindAllStringSubmatch(choice.Affects, -1)
-			for _, skill := range skills {
+			for _, skill := range regexp.MustCompile(`「(.+?)」`).FindAllStringSubmatch(choice.Affects, -1) {
 				for _, s := range res.Skills {
 					if strings.HasPrefix(skill[1], s.Name) {
 						choice.Affects = strings.ReplaceAll(choice.Affects, skill[0], "『"+skill[1]+"』")

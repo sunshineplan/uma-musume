@@ -18,7 +18,7 @@ func TestUMA(t *testing.T) {
 	tc := map[string]string{
 		"Landscape color": "緑が好きなんだな",
 
-		"メモリー☆聖地巡礼": "君の担当になれてよかった",
+		"メモリー☆聖地巡礼": "ファールー子！ファールー子！",
 
 		"どこまでも": "全力で走ってみて",
 
