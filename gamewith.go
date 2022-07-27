@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 )
 
@@ -52,27 +51,6 @@ type gamewith struct {
 func (p gamewith) name() string { return "GameWith" }
 
 func (p *gamewith) events(process bool) (events []event, err error) {
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
-
-	ctx, cancel = context.WithTimeout(ctx, time.Minute)
-	defer cancel()
-
-	var id network.RequestID
-	done := make(chan struct{})
-	chromedp.ListenTarget(ctx, func(v interface{}) {
-		switch ev := v.(type) {
-		case *network.EventRequestWillBeSent:
-			if strings.Contains(ev.Request.URL, "male_event_datas.js") {
-				id = ev.RequestID
-			}
-		case *network.EventLoadingFinished:
-			if ev.RequestID == id {
-				close(done)
-			}
-		}
-	})
-
 	file, err := os.CreateTemp("", "*.html")
 	if err != nil {
 		return
@@ -86,15 +64,14 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 <script src="https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js"></script>`)
 	file.Close()
 
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+
 	if err = chromedp.Run(ctx, chromedp.Navigate(fmt.Sprintf("file:///%s", file.Name()))); err != nil {
 		return
-	}
-
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-		return
-	case <-done:
 	}
 
 	var imageDatas gamewithImages
