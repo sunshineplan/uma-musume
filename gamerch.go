@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/chromedp/cdproto/fetch"
+	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/chromedp"
+	"github.com/sunshineplan/chrome"
 )
 
 var _ provider = &gamerch{}
@@ -51,19 +56,32 @@ type gamerch struct {
 func (p gamerch) name() string { return "Gamerch" }
 
 func (p *gamerch) events(process bool) (events []event, err error) {
-	resp, err := http.Get("https://cdn.gamerch.com/contents/plugin/umamusume/events-1656579751.json")
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
 
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
+	ctx, cancel = context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+
+	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
+		return ev.ResourceType == network.ResourceTypeDocument ||
+			(ev.ResourceType == network.ResourceTypeScript && !regexp.MustCompile("googletag|popin").MatchString(ev.Request.URL)) ||
+			ev.ResourceType == network.ResourceTypeXHR
+	}); err != nil {
 		return
 	}
 
 	var res gamerchEvents
-	if err = json.Unmarshal(b, &res); err != nil {
+	c := chrome.ListenEvent(ctx, regexp.MustCompile(`https://cdn\.gamerch\.com/contents/plugin/umamusume/events-\d+\.json`), "GET", true)
+	if err = chromedp.Run(ctx, chromedp.Navigate("https://gamerch.com/umamusume/event-checker")); err != nil {
+		return
+	}
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+	case event := <-c:
+		err = json.Unmarshal(event.Bytes, &res)
+	}
+	if err != nil {
 		return
 	}
 

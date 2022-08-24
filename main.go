@@ -31,18 +31,31 @@ func main() {
 	var events []event
 	var err error
 	for _, p := range providers {
-		events, err = p.events(json)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
 		if json {
+			events, err = p.events(json)
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+
 			if err = exportEvents(events, "uma.json"); err != nil {
 				log.Fatal(err)
 			}
+			os.WriteFile("provider", []byte(p.name()), 0644)
 		}
 		if image {
-			if err := os.MkdirAll("public/image", 0777); err != nil {
+			if !json {
+				b, _ := os.ReadFile("provider")
+				if p.name() != string(b) {
+					continue
+				} else {
+					if _, err = p.events(json); err != nil {
+						log.Print(err)
+						continue
+					}
+				}
+			}
+			if err := os.MkdirAll("public/image", 0644); err != nil {
 				log.Fatal(err)
 			}
 
