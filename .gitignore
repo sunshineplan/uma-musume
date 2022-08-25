@@ -16,8 +16,9 @@
 
 /node_modules/
 /public/build/
+/public/image/*
 !/public/image/aoharu.png
 !/public/image/climax.png
+!/public/image/grandlive.png
 !/public/image/rijicho.png
 !/public/image/ura.png
-/public/image/*
