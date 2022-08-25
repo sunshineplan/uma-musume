@@ -14,18 +14,25 @@ import (
 type character string
 
 func parseCharacter(v any) character {
-	if s, ok := v.(string); ok {
-		c := character(s)
-		if scenario, ok := parseScenario(c); ok {
-			return character(scenario)
-		}
-		return c
+	var s string
+	switch v := v.(type) {
+	case string:
+		s = v
+	case []byte:
+		s = string(v)
+	default:
+		return ""
 	}
-	return ""
+
+	c := character(s)
+	if scenario, ok := parseScenario(c); ok {
+		return character(scenario)
+	}
+	return c
 }
 
 func (c *character) UnmarshalText(b []byte) error {
-	*c = parseCharacter(string(b))
+	*c = parseCharacter(b)
 	return nil
 }
 
