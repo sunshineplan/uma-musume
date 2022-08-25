@@ -6,9 +6,53 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/sunshineplan/imgconv"
 )
+
+type character string
+
+func parseCharacter(v any) character {
+	if s, ok := v.(string); ok {
+		c := character(s)
+		if scenario, ok := parseScenario(c); ok {
+			return character(scenario)
+		}
+		return c
+	}
+	return ""
+}
+
+func (c *character) UnmarshalJSON(b []byte) error {
+	*c = parseCharacter(string(b))
+	return nil
+}
+
+type scenario string
+
+const (
+	ura       scenario = "URA"
+	aoharu    scenario = "アオハル"
+	climax    scenario = "クライマックス"
+	grandlive scenario = "グランドライブ"
+)
+
+var scenarioList = map[scenario]string{
+	ura:       "ura.png",
+	aoharu:    "aoharu.png",
+	climax:    "climax.png",
+	grandlive: "grandlive.png",
+}
+
+func parseScenario(c character) (scenario, bool) {
+	for k := range scenarioList {
+		if strings.Contains(string(c), string(k)) {
+			return k, true
+		}
+	}
+	return "", false
+}
 
 type provider interface {
 	name() string
@@ -19,13 +63,13 @@ type provider interface {
 var providers = []provider{&gamewith{}, &gamerch{}, &kamigame{}}
 
 type event struct {
-	Event     string `json:"e"`
-	Character string `json:"c"`
-	Type      string `json:"t"`
-	Rare      string `json:"r"`
-	Article   string `json:"a"`
-	Image     string `json:"i"`
-	Keyword   string `json:"k"`
+	Event     string    `json:"e"`
+	Character character `json:"c"`
+	Type      string    `json:"t"`
+	Rare      string    `json:"r"`
+	Article   string    `json:"a"`
+	Image     string    `json:"i"`
+	Keyword   string    `json:"k"`
 	Options   []struct {
 		Branch string            `json:"b"`
 		Gain   string            `json:"g"`

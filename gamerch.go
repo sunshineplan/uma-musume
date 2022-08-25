@@ -21,7 +21,7 @@ type gamerchEvents struct {
 	Cards []struct {
 		ID      int `json:"entry_id"`
 		Image   string
-		Name    string
+		Name    character
 		Rarity  string
 		Support string
 		Type    int
@@ -42,7 +42,7 @@ type gamerchEvents struct {
 }
 
 type gamerchImage struct {
-	Name  string
+	Name  character
 	Rare  string
 	Type  string
 	Image string
@@ -108,17 +108,12 @@ func (p *gamerch) events(process bool) (events []event, err error) {
 		event.Event = e.Title
 		event.Character = p.data[e.ID].Name
 		event.Article = fmt.Sprint("https://gamerch.com/umamusume/entry/", e.ID)
-		switch event.Character {
-		case "新設!URAファイナルズ":
-			event.Image = "ura.png"
-		case "アオハル杯～輝け、チームの絆～":
-			event.Image = "aoharu.png"
-		case "Make a new track!! ～クライマックス開幕～":
-			event.Image = "climax.png"
-		case "あんし～ん笹針師":
+		if scenario, ok := parseScenario(event.Character); ok {
+			event.Image = scenarioList[scenario]
+		} else if event.Character == "あんし～ん笹針師" {
 			event.Image = "rijicho.png"
 			e.Type = 3
-		default:
+		} else {
 			event.Image = fmt.Sprint(e.ID, ".png")
 		}
 

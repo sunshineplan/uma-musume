@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 	"testing"
 )
@@ -16,13 +17,12 @@ func searchEvent(event string, events []event) (res []event) {
 
 func TestUMA(t *testing.T) {
 	tc := map[string]string{
-		"Landscape color": "緑が好きなんだな",
-
-		"メモリー☆聖地巡礼": "ファールー子！ファールー子！",
-
-		"どこまでも": "全力で走ってみて",
-
-		"常に心にステージを☆": "勉強も手を抜かないで",
+		"Landscape color": "緑が好きなんだな",           // character
+		"常に心にステージを☆":      "勉強も手を抜かないで",         // support
+		"乙名史記者の徹底取材":      "現状を真摯に受け止めます",       // URA
+		"ついに集まったチームメンバー":  "HOP CHEERS",         // アオハル
+		"サプライズ大作戦":        "彼女が素直に意見を聞く人って誰だろう", // クライマックス
+		//"新曲プロデュース":        "初心にかえりましょう",         // グランドライブ
 	}
 
 	for _, p := range providers {
@@ -31,6 +31,7 @@ func TestUMA(t *testing.T) {
 			t.Errorf("%s: %s", p.name(), err)
 			continue
 		}
+		log.Println(p.name(), len(events))
 		for event, branch := range tc {
 			res := searchEvent(event, events)
 			if len(res) == 0 {

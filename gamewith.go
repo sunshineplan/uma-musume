@@ -14,13 +14,13 @@ import (
 var _ provider = &gamewith{}
 
 type gamewithEvent struct {
-	Event     string `json:"e"`
-	Character string `json:"n"`
-	Type      string `json:"c"`
-	Rare      string `json:"l"`
-	Article   string `json:"a"`
-	Image     string `json:"i"`
-	Keyword   string `json:"k"`
+	Event     string    `json:"e"`
+	Character character `json:"n"`
+	Type      string    `json:"c"`
+	Rare      string    `json:"l"`
+	Article   string    `json:"a"`
+	Image     string    `json:"i"`
+	Keyword   string    `json:"k"`
 	Options   []struct {
 		Branch string            `json:"n"`
 		Gain   string            `json:"t"`
@@ -108,19 +108,14 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 			if e.Character == "共通" {
 				e.Image = "rijicho.png"
 			} else {
-				e.Image = p.data[e.Character]
+				e.Image = p.data[string(e.Character)]
 			}
 		case "m":
-			switch e.Character {
-			case "URA":
-				e.Image = "ura.png"
-			case "アオハル":
-				e.Image = "aoharu.png"
-			case "クライマックス":
-				e.Image = "climax.png"
+			if scenario, ok := parseScenario(e.Character); ok {
+				e.Image = scenarioList[scenario]
 			}
 		case "s":
-			e.Image = p.data[e.Character+e.Rare]
+			e.Image = p.data[string(e.Character)+e.Rare]
 		}
 
 		for i, o := range e.Options {
