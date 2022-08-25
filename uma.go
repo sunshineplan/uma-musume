@@ -24,7 +24,7 @@ func parseCharacter(v any) character {
 	return ""
 }
 
-func (c *character) UnmarshalJSON(b []byte) error {
+func (c *character) UnmarshalText(b []byte) error {
 	*c = parseCharacter(string(b))
 	return nil
 }
