@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/chromedp/cdproto v0.0.0-20220827030233-358ed4af73cf
 	github.com/chromedp/chromedp v0.8.5
-	github.com/sunshineplan/chrome v1.0.7
+	github.com/sunshineplan/chrome v1.0.8
 	github.com/sunshineplan/imgconv v1.1.0
 )
 
