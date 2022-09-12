@@ -3,9 +3,9 @@ module uma
 go 1.19
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20220901095120-1a01299a2163
+	github.com/chromedp/cdproto v0.0.0-20220908234607-11c39c58d330
 	github.com/chromedp/chromedp v0.8.5
-	github.com/sunshineplan/chrome v1.0.9
+	github.com/sunshineplan/chrome v1.0.10
 	github.com/sunshineplan/imgconv v1.1.0
 )
 
@@ -24,7 +24,7 @@ require (
 	github.com/sunshineplan/pdf v1.0.2 // indirect
 	github.com/sunshineplan/tiff v0.0.0-20220128141034-29b9d69bd906 // indirect
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
-	golang.org/x/sys v0.0.0-20220907062415-87db552b00fd // indirect
+	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
