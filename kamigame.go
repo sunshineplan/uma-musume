@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,13 +28,13 @@ type kamigame struct {
 func (p kamigame) name() string { return "kamigame" }
 
 func (p *kamigame) events(process bool) (events []event, err error) {
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
+	chrome := chrome.Headless(false)
+	if _, _, err = chrome.WithTimeout(time.Minute); err != nil {
+		return
+	}
+	defer chrome.Close()
 
-	ctx, cancel = context.WithTimeout(ctx, time.Minute)
-	defer cancel()
-
-	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
+	if err = chrome.EnableFetch(func(ev *fetch.EventRequestPaused) bool {
 		return ev.ResourceType == network.ResourceTypeDocument ||
 			(ev.ResourceType == network.ResourceTypeScript && !strings.Contains(ev.Request.URL, "doubleclick")) ||
 			ev.ResourceType == network.ResourceTypeXHR
@@ -44,12 +43,12 @@ func (p *kamigame) events(process bool) (events []event, err error) {
 	}
 
 	var res [][]byte
-	c := chrome.ListenEvent(ctx, "https://kamigame.jp/vls-kamigame-gametool/json", "GET", true)
-	go chromedp.Run(ctx, chromedp.Navigate("https://kamigame.jp/umamusume/page/152540608660042049.html"))
+	c := chrome.ListenEvent("https://kamigame.jp/vls-kamigame-gametool/json", "GET", true)
+	go chrome.Run(chromedp.Navigate("https://kamigame.jp/umamusume/page/152540608660042049.html"))
 	for i := 0; i < 4; i++ {
 		select {
-		case <-ctx.Done():
-			err = ctx.Err()
+		case <-chrome.Done():
+			err = chrome.Err()
 			return
 		case event := <-c:
 			res = append(res, event.Bytes)

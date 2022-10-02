@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
+	"github.com/sunshineplan/chrome"
 )
 
 var _ provider = &gamewith{}
@@ -51,34 +49,26 @@ type gamewith struct {
 func (p gamewith) name() string { return "GameWith" }
 
 func (p *gamewith) events(process bool) (events []event, err error) {
-	file, err := os.CreateTemp("", "*.html")
-	if err != nil {
+	chrome := chrome.Headless(false)
+	if _, _, err = chrome.WithTimeout(time.Minute); err != nil {
 		return
 	}
-	defer os.Remove(file.Name())
+	defer chrome.Close()
 
-	file.WriteString(`
-<meta charset="UTF-8">
-<script>eventDatas={}</script>
-<script src="https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/common_event_datas.js"></script>
-<script src="https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js"></script>`)
-	file.Close()
-
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
-
-	ctx, cancel = context.WithTimeout(ctx, time.Minute)
-	defer cancel()
-
-	if err = chromedp.Run(ctx, chromedp.Navigate(fmt.Sprintf("file:///%s", file.Name()))); err != nil {
+	done := chrome.ListenEvent("https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
+	if err = chrome.Run(chromedp.Navigate("https://sunshineplan.github.io/uma-musume/gamewith.html")); err != nil {
 		return
+	}
+	select {
+	case <-chrome.Done():
+		return nil, chrome.Err()
+	case <-done:
 	}
 
 	var imageDatas gamewithImages
 	var eventDatas []gamewithEvent
 	var linkDatas map[string]string
-	if err = chromedp.Run(
-		ctx,
+	if err = chrome.Run(
 		chromedp.Evaluate("imageDatas", &imageDatas),
 		chromedp.Evaluate("linkDatas", &linkDatas),
 		chromedp.Evaluate("eventDatas['男']", &eventDatas),
