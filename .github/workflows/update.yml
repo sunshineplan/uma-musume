@@ -37,7 +37,7 @@ jobs:
         if: steps.check_update.outputs.new_data == 1
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'
+          node-version: latest
 
       - name: Build
         if: steps.check_update.outputs.new_data == 1
