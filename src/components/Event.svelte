@@ -88,6 +88,7 @@
               <td colspan="2">
                 <div style="display:flex">
                   {#if result.a || result.i}
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <img
                       src={result.i ? `/image/${result.i}` : ""}
                       alt={result.c}

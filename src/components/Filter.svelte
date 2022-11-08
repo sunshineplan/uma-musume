@@ -5,6 +5,7 @@
   let type = "character";
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <span class="toggle" class:on={$showFilter} on:click={showFilter.switch}>
   <svg
     viewBox="0 0 16 16"
@@ -48,6 +49,7 @@
   </div>
   <ul class="nav nav-tabs">
     <li class="nav-item">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <span
         class="nav-link"
         class:active={type == "character"}
@@ -57,6 +59,7 @@
       </span>
     </li>
     <li class="nav-item">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <span
         class="nav-link"
         class:active={type == "support"}
@@ -71,6 +74,7 @@
       <div class="characters list">
         {#each characters as i (i.name)}
           <li>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <img
               class:selected={$filter.type == "character" &&
                 $filter.name == i.name}
@@ -100,6 +104,7 @@
       <div id="supports" class="list">
         {#each $supports as i (i.image)}
           <li>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <img
               class:selected={$filter.type == "support" &&
                 $filter.image == i.image}

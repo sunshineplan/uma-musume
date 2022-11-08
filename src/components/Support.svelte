@@ -18,6 +18,7 @@
 <ul class="type">
   {#each Object.entries(type) as [key, value] (key)}
     <li>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <span
         class:checked={$support.type == value}
         on:click={() => {
@@ -35,6 +36,7 @@
 <ul class="rare">
   {#each rare as r (r)}
     <li>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <span
         class:checked={$support.rare == r.toUpperCase()}
         on:click={() => {
