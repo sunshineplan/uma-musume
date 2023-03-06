@@ -14,11 +14,13 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+.DS_Store
 dist
 node_modules
 public/image/*
 !/public/image/aoharu.png
 !/public/image/climax.png
 !/public/image/grandlive.png
+!/public/image/grandmasters.png
 !/public/image/rijicho.png
 !/public/image/ura.png

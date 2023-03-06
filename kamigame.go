@@ -28,7 +28,7 @@ type kamigame struct {
 func (p kamigame) name() string { return "kamigame" }
 
 func (p *kamigame) events(process bool) (events []event, err error) {
-	chrome := chrome.Headless(false)
+	chrome := chrome.Headless()
 	if _, _, err = chrome.WithTimeout(time.Minute); err != nil {
 		return
 	}

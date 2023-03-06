@@ -55,7 +55,7 @@ type gamerch struct {
 func (p gamerch) name() string { return "Gamerch" }
 
 func (p *gamerch) events(process bool) (events []event, err error) {
-	chrome := chrome.Headless(false)
+	chrome := chrome.Headless()
 	if _, _, err = chrome.WithTimeout(time.Minute); err != nil {
 		return
 	}

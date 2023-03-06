@@ -49,7 +49,7 @@ type gamewith struct {
 func (p gamewith) name() string { return "GameWith" }
 
 func (p *gamewith) events(process bool) (events []event, err error) {
-	chrome := chrome.Headless(false)
+	chrome := chrome.Headless()
 	if _, _, err = chrome.WithTimeout(time.Minute); err != nil {
 		return
 	}

@@ -39,17 +39,19 @@ func (c *character) UnmarshalText(b []byte) error {
 type scenario string
 
 const (
-	ura       scenario = "URA"
-	aoharu    scenario = "アオハル"
-	climax    scenario = "クライマックス"
-	grandlive scenario = "グランドライブ"
+	ura          scenario = "URA"
+	aoharu       scenario = "アオハル"
+	climax       scenario = "クライマックス"
+	grandlive    scenario = "グランドライブ"
+	grandmasters scenario = "グランドマスターズ"
 )
 
 var scenarioList = map[scenario]string{
-	ura:       "ura.png",
-	aoharu:    "aoharu.png",
-	climax:    "climax.png",
-	grandlive: "grandlive.png",
+	ura:          "ura.png",
+	aoharu:       "aoharu.png",
+	climax:       "climax.png",
+	grandlive:    "grandlive.png",
+	grandmasters: "grandmasters.png",
 }
 
 func parseScenario(c character) (scenario, bool) {
