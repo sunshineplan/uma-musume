@@ -1,6 +1,5 @@
 import type { Writable, Readable } from 'svelte/store'
 import { writable, derived } from 'svelte/store'
-import _uma from '../uma.json'
 
 export interface Event {
   e: string      // Event
@@ -39,7 +38,56 @@ type FilterType = keyof FilterTypeRegistry
 
 type Filter<FType extends FilterType = FilterType> = { type: FType } & FilterTypeRegistry[FType]
 
-const uma = _uma as Event[]
+const init = (db: IDBDatabase, create?: boolean) => {
+  return new Promise(resolve => {
+    if (create) {
+      db.createObjectStore('last')
+      db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
+    }
+    fetch('last', { cache: 'no-cache' })
+      .then(resp => resp.text()).then(date => db.transaction('last', 'readwrite').objectStore('last').put(date, 'last'))
+    fetch('uma.json', { cache: 'no-cache' }).then(resp => resp.json())
+      .then(events => {
+        const store = db.transaction('events', 'readwrite').objectStore('events')
+        const req = store.clear()
+        req.onsuccess = () => {
+          events.forEach((i: Event) => store.add(i))
+          resolve(events)
+        }
+      })
+  })
+}
+
+const checkUpdate = async (db: IDBDatabase) => {
+  return new Promise(resolve => {
+    fetch('last', { cache: 'no-cache' }).then(resp => resp.text()).then(date => {
+      const req = db.transaction('last').objectStore('last').get('last')
+      req.onsuccess = () => { resolve(date != req.result) }
+    })
+  }).then(newVersion => {
+    if (newVersion) return init(db)
+    return new Promise(resolve => {
+      const events = db.transaction('events').objectStore('events').getAll()
+      events.onsuccess = () => { resolve(events.result) }
+    })
+  })
+}
+
+const loadEvent = () => {
+  return new Promise(resolve => {
+    let upgradeneeded: boolean
+    const req = indexedDB.open('umamusume')
+    req.onupgradeneeded = () => {
+      upgradeneeded = true
+      resolve(init(req.result, true))
+    }
+    req.onsuccess = () => {
+      if (upgradeneeded) return
+      resolve(checkUpdate(req.result))
+    }
+  })
+}
+const uma = await loadEvent() as Event[]
 
 export const characters: (FilterTypeRegistry['character'] & { image: string })[] =
   Array.from(uma.filter(event => event.t == 'c'), i => { return { name: i.c, image: i.i } })

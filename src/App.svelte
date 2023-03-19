@@ -7,10 +7,3 @@
 <Nav />
 <Filter />
 <Event />
-
-<style>
-  :global(:root) {
-    --nav: 80px;
-    --filter: 289px;
-  }
-</style>
