@@ -38,34 +38,37 @@ type FilterType = keyof FilterTypeRegistry
 
 type Filter<FType extends FilterType = FilterType> = { type: FType } & FilterTypeRegistry[FType]
 
-const init = (db: IDBDatabase, create?: boolean) => {
-  return new Promise(resolve => {
-    if (create) {
-      db.createObjectStore('last')
-      db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
-    }
-    fetch('last', { cache: 'no-cache' })
-      .then(resp => resp.text()).then(date => db.transaction('last', 'readwrite').objectStore('last').put(date, 'last'))
-    fetch('uma.json', { cache: 'no-cache' }).then(resp => resp.json())
-      .then(events => {
-        const store = db.transaction('events', 'readwrite').objectStore('events')
-        const req = store.clear()
-        req.onsuccess = () => {
-          events.forEach((i: Event) => store.add(i))
-          resolve(events)
-        }
-      })
+const init = (db: IDBDatabase, last?: string) => {
+  return new Promise(async resolve => {
+    return new Promise(resolve => {
+      if (!last) {
+        db.createObjectStore('last')
+        db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
+        fetch('last', { cache: 'no-cache' }).then(resp => resp.text()).then(last => resolve(last))
+      } else resolve(last)
+    }).then(last => {
+      fetch('uma.json', { cache: 'no-cache' }).then(resp => resp.json())
+        .then(events => {
+          db.transaction('last', 'readwrite').objectStore('last').put(last, 'last')
+          const store = db.transaction('events', 'readwrite').objectStore('events')
+          const req = store.clear()
+          req.onsuccess = () => {
+            events.forEach((i: Event) => store.add(i))
+            resolve(events)
+          }
+        })
+    })
   })
 }
 
 const checkUpdate = async (db: IDBDatabase) => {
   return new Promise(resolve => {
-    fetch('last', { cache: 'no-cache' }).then(resp => resp.text()).then(date => {
+    fetch('last', { cache: 'no-cache' }).then(resp => resp.text()).then(last => {
       const req = db.transaction('last').objectStore('last').get('last')
-      req.onsuccess = () => { resolve(date != req.result) }
+      req.onsuccess = () => { resolve(last == req.result ? '' : last) }
     })
-  }).then(newVersion => {
-    if (newVersion) return init(db)
+  }).then(last => {
+    if (last) return init(db, last as string)
     return new Promise(resolve => {
       const events = db.transaction('events').objectStore('events').getAll()
       events.onsuccess = () => { resolve(events.result) }
@@ -79,14 +82,21 @@ const loadEvent = () => {
     const req = indexedDB.open('umamusume')
     req.onupgradeneeded = () => {
       upgradeneeded = true
-      resolve(init(req.result, true))
+      resolve(init(req.result))
     }
     req.onsuccess = () => {
       if (upgradeneeded) return
-      resolve(checkUpdate(req.result))
+      const db = req.result
+      if (db.objectStoreNames.length) resolve(checkUpdate(db))
+      else {
+        db.close()
+        indexedDB.deleteDatabase('umamusume')
+        resolve(loadEvent())
+      }
     }
   })
 }
+
 const uma = await loadEvent() as Event[]
 
 export const characters: (FilterTypeRegistry['character'] & { image: string })[] =
