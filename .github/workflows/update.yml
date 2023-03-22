@@ -30,7 +30,7 @@ jobs:
       - name: Commit
         if: steps.check_update.outputs.new_data == 1
         run: |
-          echo $(TZ=PRC date +'%Y-%m-%d %H:%M:%S') > last
+          echo -n $(TZ=PRC date +'%Y-%m-%d %H:%M:%S') > last
           git add .
           git commit -m "Update game data"
           git push
