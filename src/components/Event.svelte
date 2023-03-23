@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Image from "./Image.svelte";
   import { events, filter, query, showFilter } from "../stores";
   import type { Event } from "../stores";
 
@@ -89,9 +90,10 @@
                 <div style="display:flex">
                   {#if result.a || result.i}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <img
-                      src={result.i ? `/image/${result.i}` : ""}
+                    <Image
+                      id={result.i}
                       alt={result.c}
+                      type="link"
                       on:click={() => {
                         if (result.a) window.open(result.a);
                       }}
@@ -165,14 +167,6 @@
 
   tbody {
     border-width: 0 !important;
-  }
-
-  img {
-    width: 72px;
-    max-width: 72px;
-    min-height: 72px;
-    margin-right: 10px;
-    cursor: pointer;
   }
 
   @media (max-width: 767px) {

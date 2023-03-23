@@ -1,4 +1,5 @@
 <script>
+  import Image from "./Image.svelte";
   import { support } from "../stores";
 
   //https://gametora.com/umamusume
@@ -28,7 +29,7 @@
           else $support.type = value;
         }}
       >
-        <img src="/support/{key}.png" alt={key} />
+        <Image id={key} alt={key} type="type" />
       </span>
     </li>
   {/each}
@@ -46,7 +47,7 @@
           else $support.rare = r.toUpperCase();
         }}
       >
-        <img src="/support/{r}.png" alt={r} />
+        <Image id={r} alt={r} type="rare" />
       </span>
     </li>
   {/each}
@@ -101,17 +102,5 @@
 
   .rare > li:last-child span {
     border-radius: 0 14px 14px 0;
-  }
-
-  .type img {
-    height: 26px;
-    width: 26px;
-    border-radius: 5px;
-  }
-
-  .rare img {
-    height: 20px;
-    width: 50px;
-    border-radius: 15px;
   }
 </style>

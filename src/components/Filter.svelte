@@ -1,5 +1,6 @@
 <script lang="ts">
   import Support from "./Support.svelte";
+  import Image from "./Image.svelte";
   import { characters, supports, filter, query, showFilter } from "../stores";
 
   let type = "character";
@@ -36,10 +37,10 @@
       {#if !$filter.name}
         <h5 style="color:gray">なし</h5>
       {:else if $filter.type == "character"}
-        <img src="/image/{$filter.image}" alt={$filter.name} />
+        <Image id={$filter.image} alt={$filter.name} type="icon" />
         <span>{$filter.name}</span>
       {:else if $filter.type == "support"}
-        <img src="/image/{$filter.image}" alt={$filter.name} />
+        <Image id={$filter.image} alt={$filter.name} type="icon" />
         <div style="display:grid">
           <span>{$filter.name}</span>
           <span>{$filter.rare}</span>
@@ -75,12 +76,12 @@
         {#each characters as i (i.name)}
           <li>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <img
-              class:selected={$filter.type == "character" &&
-                $filter.name == i.name}
-              src="/image/{i.image}"
+            <Image
+              selected={$filter.type == "character" && $filter.name == i.name}
+              id={i.image}
               alt={i.name}
               title={i.name}
+              type="icon"
               style="height:72px"
               on:click={() => {
                 if (window.innerWidth <= 767) showFilter.off();
@@ -105,12 +106,12 @@
         {#each $supports as i (i.image)}
           <li>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <img
-              class:selected={$filter.type == "support" &&
-                $filter.image == i.image}
-              src="/image/{i.image}"
+            <Image
+              selected={$filter.type == "support" && $filter.image == i.image}
+              id={i.image}
               alt={i.name}
               title={i.name}
+              type="icon"
               style="min-height:96px"
               on:click={() => {
                 if (window.innerWidth <= 767) showFilter.off();
@@ -245,19 +246,6 @@
 
   li {
     display: inline-block;
-  }
-
-  img {
-    width: 72px;
-    max-width: 72px;
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 8px;
-    border-color: transparent;
-  }
-
-  .selected {
-    border-color: #007bff;
   }
 
   @media (max-width: 767px) {

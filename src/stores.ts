@@ -43,6 +43,7 @@ type Filter<FType extends FilterType = FilterType> = { type: FType } & FilterTyp
 export const db = new Dexie('umamusume')
 db.version(1).stores({
   events: '++id',
+  images: 'id',
 })
 
 const init = async (last: string) => {
