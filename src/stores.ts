@@ -1,5 +1,7 @@
 import type { Writable, Readable } from 'svelte/store'
 import { writable, derived } from 'svelte/store'
+import { Dexie } from 'dexie'
+import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
 
 export interface Event {
   e: string      // Event
@@ -38,66 +40,30 @@ type FilterType = keyof FilterTypeRegistry
 
 type Filter<FType extends FilterType = FilterType> = { type: FType } & FilterTypeRegistry[FType]
 
-const init = (db: IDBDatabase, last?: string) => {
-  return new Promise(async resolve => {
-    return new Promise(resolve => {
-      if (!last) {
-        db.createObjectStore('last')
-        db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
-        fetch('last', { cache: 'no-cache' }).then(resp => resp.text()).then(last => resolve(last))
-      } else resolve(last)
-    }).then(last => {
-      fetch('uma.json', { cache: 'no-cache' }).then(resp => resp.json())
-        .then(events => {
-          db.transaction('last', 'readwrite').objectStore('last').put(last, 'last')
-          const store = db.transaction('events', 'readwrite').objectStore('events')
-          const req = store.clear()
-          req.onsuccess = () => {
-            events.forEach((i: Event) => store.add(i))
-            resolve(events)
-          }
-        })
-    })
-  })
+export const db = new Dexie('umamusume')
+db.version(1).stores({
+  events: '++id',
+})
+
+const init = async (last: string) => {
+  await db.table('events').clear()
+  const events = await fetch('uma.json', { cache: 'no-cache' })
+  await db.table('events').bulkAdd(await events.json())
+  setCookie('last', last, { expires: 100 * 365 })
 }
 
-const checkUpdate = async (db: IDBDatabase) => {
-  return new Promise(resolve => {
-    fetch('last', { cache: 'no-cache' }).then(resp => resp.text()).then(last => {
-      const req = db.transaction('last').objectStore('last').get('last')
-      req.onsuccess = () => { resolve(last == req.result ? '' : last) }
-    })
-  }).then(last => {
-    if (last) return init(db, last as string)
-    return new Promise(resolve => {
-      const events = db.transaction('events').objectStore('events').getAll()
-      events.onsuccess = () => { resolve(events.result) }
-    })
-  })
+const loadEvents = async (): Promise<Event[]> => {
+  const resp = await fetch('last', { cache: 'no-cache' })
+  const last = await resp.text()
+  if (last != getCookie('last')) await init(last)
+  const events = await db.table('events').toArray()
+  if (!events.length) {
+    removeCookie('last')
+    return await loadEvents()
+  }
+  return events
 }
-
-const loadEvent = () => {
-  return new Promise(resolve => {
-    let upgradeneeded: boolean
-    const req = indexedDB.open('umamusume')
-    req.onupgradeneeded = () => {
-      upgradeneeded = true
-      resolve(init(req.result))
-    }
-    req.onsuccess = () => {
-      if (upgradeneeded) return
-      const db = req.result
-      if (db.objectStoreNames.length) resolve(checkUpdate(db))
-      else {
-        db.close()
-        indexedDB.deleteDatabase('umamusume')
-        resolve(loadEvent())
-      }
-    }
-  })
-}
-
-const uma = await loadEvent() as Event[]
+const uma = await loadEvents()
 
 export const characters: (FilterTypeRegistry['character'] & { image: string })[] =
   Array.from(uma.filter(event => event.t == 'c'), i => { return { name: i.c, image: i.i } })

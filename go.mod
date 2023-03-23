@@ -3,7 +3,7 @@ module uma
 go 1.20
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20230220211738-2b1ec77315c9
+	github.com/chromedp/cdproto v0.0.0-20230319112347-6603f2c23d36
 	github.com/chromedp/chromedp v0.9.1
 	github.com/sunshineplan/chrome v1.1.1
 	github.com/sunshineplan/imgconv v1.1.4
@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/pdfcpu/pdfcpu v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rivo/uniseg v0.4.3 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/sunshineplan/pdf v1.0.3 // indirect
 	github.com/sunshineplan/tiff v0.0.0-20220128141034-29b9d69bd906 // indirect
 	golang.org/x/image v0.6.0 // indirect
