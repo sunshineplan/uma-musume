@@ -1,7 +1,37 @@
-import type { Writable, Readable } from 'svelte/store'
-import { writable, derived } from 'svelte/store'
+import { type Writable, type Readable, writable, derived } from 'svelte/store'
 import { Dexie } from 'dexie'
 import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
+
+export const db = new Dexie('umamusume')
+db.version(1).stores({
+  events: '++id',
+  images: 'id',
+})
+
+const init = async (last: string) => {
+  const resp = await fetch('uma.json', { cache: 'no-cache' })
+  const events = await resp.json()
+  if (events) {
+    await db.table('events').clear()
+    await db.table('events').bulkAdd(events)
+    setCookie('last', last, { expires: 365 })
+  }
+  return events as Event[]
+}
+
+const loadEvents = async (): Promise<Event[]> => {
+  const resp = await fetch('last', { cache: 'no-cache' })
+  const last = await resp.text()
+  let events: Event[]
+  if (last != getCookie('last')) events = await init(last)
+  else events = await db.table('events').toArray()
+  if (!events || !events.length) {
+    removeCookie('last')
+    return await loadEvents()
+  }
+  return events
+}
+const uma = await loadEvents()
 
 interface FilterTypeRegistry {
   character: {
@@ -19,32 +49,6 @@ interface FilterTypeRegistry {
 type FilterType = keyof FilterTypeRegistry
 
 type Filter<FType extends FilterType = FilterType> = { type: FType } & FilterTypeRegistry[FType]
-
-export const db = new Dexie('umamusume')
-db.version(1).stores({
-  events: '++id',
-  images: 'id',
-})
-
-const init = async (last: string) => {
-  await db.table('events').clear()
-  const events = await fetch('uma.json', { cache: 'no-cache' })
-  await db.table('events').bulkAdd(await events.json())
-  setCookie('last', last, { expires: 365 })
-}
-
-const loadEvents = async (): Promise<Event[]> => {
-  const resp = await fetch('last', { cache: 'no-cache' })
-  const last = await resp.text()
-  if (last != getCookie('last')) await init(last)
-  const events = await db.table('events').toArray()
-  if (!events.length) {
-    removeCookie('last')
-    return await loadEvents()
-  }
-  return events
-}
-const uma = await loadEvents()
 
 export const characters: (FilterTypeRegistry['character'] & { image: string })[] =
   Array.from(uma.filter(event => event.t == 'c'), i => { return { name: i.c, image: i.i } })
