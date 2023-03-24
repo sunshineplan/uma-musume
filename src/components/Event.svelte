@@ -1,7 +1,6 @@
 <script lang="ts">
   import Image from "./Image.svelte";
   import { events, filter, query, showFilter } from "../stores";
-  import type { Event } from "../stores";
 
   let results: Event[] = [];
 

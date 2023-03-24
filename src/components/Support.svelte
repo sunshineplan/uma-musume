@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
   import Image from "./Image.svelte";
   import { support } from "../stores";
 
   //https://gametora.com/umamusume
-  const type = {
+  const type: { [key: string]: Support["type"] } = {
     speed: "スピ",
     stamina: "スタ",
     power: "パワ",
@@ -13,7 +13,7 @@
     group: "グル",
   };
 
-  const rare = ["ssr", "sr", "r"];
+  const rare: Support["rare"][] = ["SSR", "SR", "R"];
 </script>
 
 <ul class="type">
@@ -39,15 +39,15 @@
     <li>
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <span
-        class:checked={$support.rare == r.toUpperCase()}
+        class:checked={$support.rare == r}
         on:click={() => {
           const div = document.getElementById("supports");
           if (div) div.scrollTop = 0;
-          if ($support.rare == r.toUpperCase()) $support.rare = undefined;
-          else $support.rare = r.toUpperCase();
+          if ($support.rare == r) $support.rare = undefined;
+          else $support.rare = r;
         }}
       >
-        <Image id={r} alt={r} type="rare" />
+        <Image id={r.toLowerCase()} alt={r} type="rare" />
       </span>
     </li>
   {/each}

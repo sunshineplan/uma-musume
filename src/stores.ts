@@ -3,21 +3,6 @@ import { writable, derived } from 'svelte/store'
 import { Dexie } from 'dexie'
 import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
 
-export interface Event {
-  e: string      // Event
-  c: string      // Character
-  t: string      // Type
-  r: string      // Rare
-  a: string      // Article
-  i: string      // Image
-  k: string      // Keyword
-  o: {
-    b: string    // Branch
-    g: string    // Gain
-    s: object    // Skill
-  }[]            // Options
-}
-
 interface FilterTypeRegistry {
   character: {
     name: string
@@ -29,11 +14,6 @@ interface FilterTypeRegistry {
     rare: string
     image: string
   }
-}
-
-interface Support {
-  type?: 'スピ' | 'スタ' | 'パワ' | '根性' | '賢さ' | '友人' | 'グル'
-  rare?: 'SSR' | 'SR' | 'R'
 }
 
 type FilterType = keyof FilterTypeRegistry
@@ -50,7 +30,7 @@ const init = async (last: string) => {
   await db.table('events').clear()
   const events = await fetch('uma.json', { cache: 'no-cache' })
   await db.table('events').bulkAdd(await events.json())
-  setCookie('last', last, { expires: 100 * 365 })
+  setCookie('last', last, { expires: 365 })
 }
 
 const loadEvents = async (): Promise<Event[]> => {
