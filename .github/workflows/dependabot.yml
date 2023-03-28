@@ -29,6 +29,7 @@ jobs:
       - name: Test Code
         run: |
           npm install
+          npm run check
           npm run build
           go test -v ./...
 
