@@ -12,9 +12,10 @@ const init = async (last: string) => {
   const resp = await fetch('uma.json', { cache: 'no-cache' })
   const events = await resp.json()
   if (events) {
-    await db.table('events').clear()
-    await db.table('events').bulkAdd(events)
-    setCookie('last', last, { expires: 365 })
+    await db.transaction('rw!', db.table('events'), async () => {
+      await db.table('events').clear()
+      await db.table('events').bulkAdd(events)
+    }).then(() => setCookie('last', last, { expires: 365 }))
   }
   return events as Event[]
 }

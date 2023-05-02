@@ -21,11 +21,12 @@
     });
     if (res) image = res.image;
     if (!image || !image.size) {
-      let url = `/image/${id}`;
-      if (!id.endsWith(".png")) url = `/support/${id}.png`;
+      const img = id;
+      let url = `/image/${img}`;
+      if (!id.endsWith(".png")) url = `/support/${img}.png`;
       const resp = await fetch(url);
       image = await resp.blob();
-      if (image.size) db.table("images").put({ id, image });
+      if (image.size) db.table("images").put({ img, image });
     }
     if (image.size) src = URL.createObjectURL(image);
     else src = "";
