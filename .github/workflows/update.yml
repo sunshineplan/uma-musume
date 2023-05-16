@@ -22,8 +22,8 @@ jobs:
       - name: Check Update
         id: check_update
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name "GitHub Actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
           git diff-index --quiet HEAD || echo "new_data=1" >> $GITHUB_OUTPUT
 
