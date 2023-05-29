@@ -13,7 +13,7 @@
     "@tsconfig/svelte": "^4.0.1",
     "dexie": "^3.2.3",
     "svelte": "^3.59.1",
-    "svelte-check": "^3.3.2",
+    "svelte-check": "^3.4.3",
     "tslib": "^2.5.2",
     "typescript": "^5.0.4",
     "typescript-cookie": "^1.0.6",
