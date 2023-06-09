@@ -225,7 +225,7 @@
   }
 
   .list {
-    overflow: overlay;
+    overflow: auto;
   }
 
   .characters {
@@ -234,14 +234,6 @@
 
   #supports {
     height: calc(100% - 90px);
-  }
-
-  .list:hover::-webkit-scrollbar-thumb {
-    background: #6c757d;
-  }
-
-  ::-webkit-scrollbar {
-    width: 3px;
   }
 
   li {
