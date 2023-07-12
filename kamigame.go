@@ -188,7 +188,11 @@ func (p *kamigame) generate(event event, choices []any) (events []event) {
 		for _, i := range p.character {
 			if event.Character == parseCharacter(i[0]) {
 				event.Article = fmt.Sprint("https://kamigame.jp", i[1])
-				event.Image = regexp.MustCompile(`(\d+).html`).FindStringSubmatch(event.Article)[1] + ".png"
+				if re := regexp.MustCompile(`(\d+).html`); re.MatchString(event.Article) {
+					event.Image = re.FindStringSubmatch(event.Article)[1] + ".png"
+				} else {
+					return
+				}
 				break
 			}
 		}
@@ -206,6 +210,8 @@ func (p *kamigame) generate(event event, choices []any) (events []event) {
 				event.Article = fmt.Sprint("https://kamigame.jp", i[2])
 				if re := regexp.MustCompile(`(\d+).html`); re.MatchString(event.Article) {
 					event.Image = re.FindStringSubmatch(event.Article)[1] + ".png"
+				} else {
+					return
 				}
 				event.Rare = string([]rune(i[5].(string))[:2]) + i[4].(string)
 				events = append(events, event)
