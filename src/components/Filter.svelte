@@ -7,6 +7,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <span class="toggle" class:on={$showFilter} on:click={showFilter.switch}>
   <svg
     viewBox="0 0 16 16"
@@ -51,6 +52,7 @@
   <ul class="nav nav-tabs">
     <li class="nav-item">
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span
         class="nav-link"
         class:active={type == "character"}
@@ -61,6 +63,7 @@
     </li>
     <li class="nav-item">
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span
         class="nav-link"
         class:active={type == "support"}

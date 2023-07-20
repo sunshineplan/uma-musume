@@ -34,6 +34,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <img class={type} class:selected {style} {src} {title} {alt} on:click />
 
 <style>

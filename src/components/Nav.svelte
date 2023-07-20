@@ -2,6 +2,7 @@
   import { showFilter } from "../stores";
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <header
   class="navbar navbar-expand flex-column flex-md-row"
   on:mousedown={showFilter.off}

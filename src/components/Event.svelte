@@ -55,6 +55,7 @@
   };
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="content" on:mousedown={showFilter.off}>
   <div class="input-group">
     <input

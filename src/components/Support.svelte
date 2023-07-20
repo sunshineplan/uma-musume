@@ -20,6 +20,7 @@
   {#each Object.entries(type) as [key, value] (key)}
     <li>
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span
         class:checked={$support.type == value}
         on:click={() => {
@@ -38,6 +39,7 @@
   {#each rare as r (r)}
     <li>
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span
         class:checked={$support.rare == r}
         on:click={() => {
