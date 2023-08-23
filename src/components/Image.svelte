@@ -20,7 +20,8 @@
       return db.table("images").get({ id });
     });
     if (res) image = res.image;
-    if (!image || !image.size) {
+    else image = new Blob();
+    if (!image.size) {
       const img = id;
       let url = `/image/${img}`;
       if (!id.endsWith(".png")) url = `/support/${img}.png`;

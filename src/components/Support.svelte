@@ -49,7 +49,9 @@
           else $support.rare = r;
         }}
       >
-        <Image id={r.toLowerCase()} alt={r} type="rare" />
+        {#if r}
+          <Image id={r.toLowerCase()} alt={r} type="rare" />
+        {/if}
       </span>
     </li>
   {/each}
