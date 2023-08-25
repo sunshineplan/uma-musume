@@ -44,6 +44,7 @@ const (
 	climax       scenario = "クライマックス"
 	grandlive    scenario = "グランドライブ"
 	grandmasters scenario = "グランドマスターズ"
+	projectlark  scenario = "プロジェクトL'Arc"
 )
 
 var scenarioList = map[scenario]string{
@@ -52,6 +53,7 @@ var scenarioList = map[scenario]string{
 	climax:       "climax.png",
 	grandlive:    "grandlive.png",
 	grandmasters: "grandmasters.png",
+	projectlark:  "projectlark.png",
 }
 
 func parseScenario(c character) (scenario, bool) {
@@ -69,7 +71,7 @@ type provider interface {
 	images() error
 }
 
-var providers = []provider{&gamewith{}, &gamerch{}, &kamigame{}}
+var providers = []provider{&gamewith{}, &kamigame{}}
 
 type event struct {
 	Event     string    `json:"e"`
