@@ -44,7 +44,7 @@ const (
 	climax       scenario = "クライマックス"
 	grandlive    scenario = "グランドライブ"
 	grandmasters scenario = "グランドマスターズ"
-	projectlark  scenario = "プロジェクトL'Arc"
+	projectlark  scenario = "プロジェクトL’Arc" // unusual single quote
 )
 
 var scenarioList = map[scenario]string{
