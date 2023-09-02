@@ -115,7 +115,7 @@
             {#each result.o as option (option.b)}
               <tr>
                 <td style="vertical-align:middle">
-                  {option.b}
+                  {@html option.b}
                 </td>
                 <td style="white-space:pre-line">
                   {@html addlink(option)}
