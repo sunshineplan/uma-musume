@@ -36,7 +36,7 @@
     </div>
     <div class="display">
       {#if !$filter.name}
-        <h5 style="color:gray">なし</h5>
+        <h5 style="color:gray">無</h5>
       {:else if $filter.type == "character"}
         <Image id={$filter.image} alt={$filter.name} type="icon" />
         <span>{$filter.name}</span>
@@ -106,37 +106,41 @@
     {:else}
       <Support />
       <div id="supports" class="list">
-        {#each $supports as i (i.image)}
-          <li>
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <Image
-              selected={$filter.type == "support" && $filter.image == i.image}
-              id={i.image}
-              alt={i.name}
-              title={i.name}
-              type="icon"
-              style="min-height:96px"
-              on:click={() => {
-                if (window.innerWidth <= 767) showFilter.off();
-                if (
-                  $filter.name &&
-                  ($filter.type == "character" ||
-                    ($filter.type == "support" && $filter.image != i.image))
-                )
-                  $query = "";
-                if ($filter.type == "support" && $filter.image == i.image)
-                  $filter = { type: "support", name: "", image: "" };
-                else
-                  $filter = {
-                    type: "support",
-                    name: i.name,
-                    rare: i.rare,
-                    image: i.image,
-                  };
-              }}
-            />
-          </li>
-        {/each}
+        {#if $supports.length}
+          {#each $supports as i (i.image)}
+            <li>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <Image
+                selected={$filter.type == "support" && $filter.image == i.image}
+                id={i.image}
+                alt={i.name}
+                title={i.name}
+                type="icon"
+                style="min-height:96px"
+                on:click={() => {
+                  if (window.innerWidth <= 767) showFilter.off();
+                  if (
+                    $filter.name &&
+                    ($filter.type == "character" ||
+                      ($filter.type == "support" && $filter.image != i.image))
+                  )
+                    $query = "";
+                  if ($filter.type == "support" && $filter.image == i.image)
+                    $filter = { type: "support", name: "", image: "" };
+                  else
+                    $filter = {
+                      type: "support",
+                      name: i.name,
+                      rare: i.rare,
+                      image: i.image,
+                    };
+                }}
+              />
+            </li>
+          {/each}
+        {:else}
+          無
+        {/if}
       </div>
     {/if}
   </div>

@@ -74,7 +74,9 @@
   }
 
   .checked {
-    background: linear-gradient(to bottom, #6c757d, #5c636a);
+    transform: none;
+    filter: none;
+    box-shadow: inset 3px 3px 4px rgba(0, 0, 0, 0.2);
   }
 
   span {
@@ -82,6 +84,9 @@
     margin: 0;
     padding: 5px 7px;
     cursor: pointer;
+    transform: translate(-2px, -2px);
+    filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2));
+    transition: all 0.1s;
   }
 
   .type {
