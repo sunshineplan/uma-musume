@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { fly } from "svelte/transition";
   import Image from "./Image.svelte";
   import { events, filter, query, showFilter } from "../stores";
 
   let results: Event[] = [];
+  let count = 0;
 
   $: $filter, search();
 
@@ -23,18 +25,45 @@
   const search = () => {
     const div = document.getElementById("results");
     if (div) div.scrollTop = 0;
-    if (!$query) {
-      if (!$filter.name) results = [];
-      else results = $events;
-    } else if ($query == "*") results = $events;
-    else if (!$filter.name && $query.length == 1) results = [];
-    else {
-      let r: Event[] = [];
-      $events.forEach((event) => {
-        if (match($query, event)) r.push(event);
-      });
-      results = r;
+    const interval = 70;
+    const length = results.length > 5 ? 5 : results.length;
+    if (length) {
+      results = results.slice(0, length);
+      const id = setInterval(() => {
+        if (results.length) {
+          results = results.slice(1, results.length);
+          return;
+        }
+        clearInterval(id);
+      }, interval);
     }
+    let res: Event[] = [];
+    if (!$query) {
+      if ($filter.name) res = $events;
+    } else if ($query == "*") res = $events;
+    else if (!$filter.name && $query.length == 1) res = [];
+    else {
+      $events.forEach((event) => {
+        if (match($query, event)) res.push(event);
+      });
+    }
+    count = res.length;
+    if (count)
+      setTimeout(
+        () => {
+          let i = 1;
+          const id = setInterval(() => {
+            if (i <= 5 && i <= count) {
+              results = res.slice(0, i);
+              i++;
+              return;
+            }
+            clearInterval(id);
+            if (count > 5) results = res;
+          }, interval);
+        },
+        length ? length * interval + 300 : 0
+      );
   };
 
   const addlink = (option: { b: string; g: string; s: object }) => {
@@ -71,62 +100,64 @@
   </div>
   <div class="message">
     <span>{`※${$filter.name ? 1 : 2}文字以上入力すると検索を開始します`}</span>
-    <span style="float:right">{`(${results.length}/${$events.length})`}</span>
+    <span style="float:right">{`(${count}/${$events.length})`}</span>
   </div>
-  {#if results.length}
-    <div id="results">
-      {#each results as result}
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th colspan="2">
-                {result.e}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="2">
-                <div style="display:flex">
-                  {#if result.a || result.i}
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <Image
-                      id={result.i}
-                      alt={result.c}
-                      type="link"
-                      on:click={() => {
-                        if (result.a) window.open(result.a);
-                      }}
-                    />
+  <div id="results">
+    {#each results as result (result.c + result.r + result.e + result.k + JSON.stringify(result.o))}
+      <table
+        class="table table-bordered"
+        in:fly={{ x: "100%", duration: 400 }}
+        out:fly={{ x: "100%", duration: 400 }}
+      >
+        <thead>
+          <tr>
+            <th colspan="2">
+              {result.e}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="2">
+              <div style="display:flex">
+                {#if result.a || result.i}
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <Image
+                    id={result.i}
+                    alt={result.c}
+                    type="link"
+                    on:click={() => {
+                      if (result.a) window.open(result.a);
+                    }}
+                  />
+                {/if}
+                <div style="display:grid">
+                  {#if result.t == "m"}
+                    <span>{result.c}</span>
+                    <span>メインシナリオイベント</span>
+                  {:else}
+                    <span>{result.c}</span>
+                    <span>{result.t == "c" ? "ウマ娘" : "サポート"}</span>
+                    <span>{result.r}</span>
                   {/if}
-                  <div style="display:grid">
-                    {#if result.t == "m"}
-                      <span>{result.c}</span>
-                      <span>メインシナリオイベント</span>
-                    {:else}
-                      <span>{result.c}</span>
-                      <span>{result.t == "c" ? "ウマ娘" : "サポート"}</span>
-                      <span>{result.r}</span>
-                    {/if}
-                  </div>
                 </div>
+              </div>
+            </td>
+          </tr>
+          {#each result.o as option (option.b)}
+            <tr>
+              <td style="vertical-align:middle">
+                {@html option.b}
+              </td>
+              <td style="white-space:pre-line">
+                {@html addlink(option)}
               </td>
             </tr>
-            {#each result.o as option (option.b)}
-              <tr>
-                <td style="vertical-align:middle">
-                  {@html option.b}
-                </td>
-                <td style="white-space:pre-line">
-                  {@html addlink(option)}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/each}
-    </div>
-  {/if}
+          {/each}
+        </tbody>
+      </table>
+    {/each}
+  </div>
 </div>
 
 <style>
