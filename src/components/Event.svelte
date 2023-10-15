@@ -27,9 +27,7 @@
     let res: Event[] = [];
     if (!$query) {
       if ($filter.name) res = $events;
-    } else if ($query == "*") res = $events;
-    else if (!$filter.name && $query.length == 1) res = [];
-    else {
+    } else if ($filter.name ? $query.length > 0 : $query.length > 1) {
       $events.forEach((event) => {
         if (match($query, event)) res.push(event);
       });
@@ -94,7 +92,7 @@
     <input
       class="form-control"
       type="search"
-      placeholder="ウマ娘名、イベント、選択肢テキスト、*"
+      placeholder="ウマ娘名、イベント、選択肢テキスト"
       bind:value={$query}
       on:keydown={(e) => {
         if (e.key === "Escape") reset();
@@ -148,7 +146,7 @@
               </div>
             </td>
           </tr>
-          {#each result.o as option (option.b)}
+          {#each result.o as option (option.b + option.g)}
             <tr>
               <td style="vertical-align:middle">
                 {@html option.b}

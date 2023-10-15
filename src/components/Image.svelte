@@ -25,9 +25,13 @@
       const img = id;
       let url = `/image/${img}`;
       if (!id.endsWith(".png")) url = `/support/${img}.png`;
-      const resp = await fetch(url);
-      image = await resp.blob();
-      if (image.size) db.table("images").put({ img, image });
+      try {
+        const resp = await fetch(url);
+        if (resp.ok) {
+          image = await resp.blob();
+          if (img && image.size) db.table("images").put({ id: img, image });
+        }
+      } catch {}
     }
     if (image.size) src = URL.createObjectURL(image);
     else src = "";
