@@ -5,6 +5,7 @@
 
   let results: Event[] = [];
   let count = 0;
+  let current = 0;
 
   $: $filter, search();
 
@@ -23,20 +24,6 @@
   };
 
   const search = () => {
-    const div = document.getElementById("results");
-    if (div) div.scrollTop = 0;
-    const interval = 70;
-    const length = results.length > 5 ? 5 : results.length;
-    if (length) {
-      results = results.slice(0, length);
-      const id = setInterval(() => {
-        if (results.length) {
-          results = results.slice(1, results.length);
-          return;
-        }
-        clearInterval(id);
-      }, interval);
-    }
     let res: Event[] = [];
     if (!$query) {
       if ($filter.name) res = $events;
@@ -47,20 +34,37 @@
         if (match($query, event)) res.push(event);
       });
     }
-    count = res.length;
-    if (count)
+    const div = document.getElementById("results");
+    if (div) div.scrollTop = 0;
+    const interval = 70;
+    current++;
+    const pid = current;
+    const length = results.length > 5 ? 5 : results.length;
+    if (length) {
+      results = results.slice(0, length);
+      const id = setInterval(() => {
+        if (results.length && pid == current) {
+          results = results.slice(1, results.length);
+          return;
+        }
+        clearInterval(id);
+      }, interval);
+    }
+    if ((count = res.length))
       setTimeout(
         () => {
-          let i = 1;
-          const id = setInterval(() => {
-            if (i <= 5 && i <= count) {
-              results = res.slice(0, i);
-              i++;
-              return;
-            }
-            clearInterval(id);
-            if (count > 5) results = res;
-          }, interval);
+          if (pid == current) {
+            let i = 1;
+            const id = setInterval(() => {
+              if (i <= 5 && i <= count && pid == current) {
+                results = res.slice(0, i);
+                i++;
+                return;
+              }
+              clearInterval(id);
+              if (count > 5 && pid == current) results = res;
+            }, interval);
+          }
         },
         length ? length * interval + 300 : 0
       );
