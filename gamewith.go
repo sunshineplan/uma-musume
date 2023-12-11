@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -54,16 +55,19 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 		return
 	}
 	defer chrome.Close()
-
+	log.Print("listen event")
 	done := chrome.ListenEvent("https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
+	log.Print("navigate")
 	if err = chrome.Run(chromedp.Navigate("https://sunshineplan.github.io/uma-musume/gamewith.html")); err != nil {
 		return
 	}
+	log.Print("select")
 	select {
 	case <-chrome.Done():
 		return nil, chrome.Err()
 	case <-done:
 	}
+	log.Print("done")
 
 	var imageDatas gamewithImages
 	var eventDatas []gamewithEvent
@@ -75,6 +79,7 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 	); err != nil {
 		return
 	}
+	log.Print("evaluated")
 
 	p.data = make(map[string]string)
 	for _, i := range imageDatas.Support {
