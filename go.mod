@@ -6,7 +6,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20231011050154-1d073bb38998
 	github.com/chromedp/chromedp v0.9.3
 	github.com/sunshineplan/chrome v1.1.8
-	github.com/sunshineplan/imgconv v1.1.8
+	github.com/sunshineplan/imgconv v1.1.9
 )
 
 require (
@@ -24,7 +24,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/sunshineplan/pdf v1.0.7 // indirect
-	golang.org/x/image v0.14.0 // indirect
+	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
