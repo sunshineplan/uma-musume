@@ -3,8 +3,8 @@ module uma
 go 1.21.0
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20231011050154-1d073bb38998
-	github.com/chromedp/chromedp v0.9.3
+	github.com/chromedp/cdproto v0.0.0-20240127002248-bd7a66284627
+	github.com/chromedp/chromedp v0.9.4
 	github.com/sunshineplan/chrome v1.1.8
 	github.com/sunshineplan/imgconv v1.1.9
 )
@@ -14,7 +14,7 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.3.0 // indirect
+	github.com/gobwas/ws v1.3.2 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
 	github.com/hhrutter/tiff v1.0.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
