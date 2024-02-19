@@ -58,7 +58,7 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 	log.Print("listen event")
 	done := chrome.ListenEvent("https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
 	log.Print("navigate")
-	if err = chrome.Run(chromedp.Navigate("https://sunshineplan.github.io/uma-musume/gamewith.html")); err != nil {
+	if err = chrome.Run(chromedp.Navigate("https://umamusume.sunshineplan.cc/gamewith.html")); err != nil {
 		return
 	}
 	log.Print("select")
