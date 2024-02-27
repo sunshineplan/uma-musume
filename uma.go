@@ -45,6 +45,7 @@ const (
 	grandlive    scenario = "グランドライブ"
 	grandmasters scenario = "グランドマスターズ"
 	projectlark  scenario = "プロジェクトL’Arc" // unusual single quote
+	uaf          scenario = "UAF"
 )
 
 var scenarioList = map[scenario]string{
@@ -54,6 +55,7 @@ var scenarioList = map[scenario]string{
 	grandlive:    "grandlive.png",
 	grandmasters: "grandmasters.png",
 	projectlark:  "projectlark.png",
+	uaf:          "uaf.png",
 }
 
 func parseScenario(c character) (scenario, bool) {
