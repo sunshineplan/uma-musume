@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"regexp"
 	"strings"
@@ -50,21 +51,20 @@ type gamewith struct {
 func (p gamewith) name() string { return "GameWith" }
 
 func (p *gamewith) events(process bool) (events []event, err error) {
-	chrome := chrome.Headless()
-	if _, _, err = chrome.WithTimeout(time.Minute); err != nil {
-		return
-	}
-	defer chrome.Close()
+	c := chrome.Headless()
+	defer c.Close()
+	ctx, cancel := context.WithTimeout(c, time.Minute)
+	defer cancel()
 	log.Print("listen event")
-	done := chrome.ListenEvent("https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
+	done := chrome.ListenEvent(ctx, "https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
 	log.Print("navigate")
-	if err = chrome.Run(chromedp.Navigate("https://umamusume.sunshineplan.cc/gamewith.html")); err != nil {
+	if err = chromedp.Run(ctx, chromedp.Navigate("https://umamusume.sunshineplan.cc/gamewith.html")); err != nil {
 		return
 	}
 	log.Print("select")
 	select {
-	case <-chrome.Done():
-		return nil, chrome.Err()
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case <-done:
 	}
 	log.Print("done")
@@ -72,7 +72,8 @@ func (p *gamewith) events(process bool) (events []event, err error) {
 	var imageDatas gamewithImages
 	var eventDatas []gamewithEvent
 	var linkDatas map[string]string
-	if err = chrome.Run(
+	if err = chromedp.Run(
+		ctx,
 		chromedp.Evaluate("imageDatas", &imageDatas),
 		chromedp.Evaluate("linkDatas", &linkDatas),
 		chromedp.Evaluate("eventDatas['男']", &eventDatas),
