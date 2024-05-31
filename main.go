@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -22,6 +23,13 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "release":
+		current, err := os.ReadFile("last")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if !bytes.Equal(current, fmt.Appendf(nil, "%x", sum)) {
+			log.Fatal("sha256 is not same")
+		}
 		if err := os.WriteFile("uma.json", b, 0644); err != nil {
 			log.Fatal(err)
 		}

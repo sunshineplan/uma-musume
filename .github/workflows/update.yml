@@ -44,7 +44,8 @@ jobs:
       - name: Build
         if: steps.check_update.outputs.new_data == 1
         run: |
-          mv last public/
+          go run . release
+          mv uma.json last public/
           npm install
           npm run build
 
@@ -55,61 +56,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           cname: ${{ secrets.CNAME }}
-
-  release:
-    runs-on: ubuntu-latest
-    needs: update
-    if: needs.update.outputs.new_data == 1
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
-
-      - name: Delete Old Release
-        uses: actions/github-script@v7
-        with:
-          script: |
-            let release
-            try {
-              release = await github.rest.repos.getLatestRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo
-              })
-            } catch(e) {
-              console.error(e)
-              return
-            }
-
-            await github.rest.repos.deleteRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: release.data.id
-            })
-
-            await github.rest.git.deleteRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'tags/'+release.data.tag_name
-            })
-
-      - name: Export
-        id: release
-        run: |
-          go run . release
-          echo "date=$(TZ=PRC date +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.release.outputs.date }}
-          name: ${{ steps.release.outputs.date }}
-          body: ${{ steps.release.outputs.date }}
-          files: uma.json

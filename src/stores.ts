@@ -9,7 +9,7 @@ db.version(1).stores({
 })
 
 const init = async (last: string) => {
-  const resp = await fetch('https://github.com/sunshineplan/uma-musume/releases/latest/download/uma.json', { cache: 'no-cache' })
+  const resp = await fetch('uma.json', { cache: 'no-cache' })
   const events = await resp.json()
   if (events) {
     await db.transaction('rw!', db.table('events'), async () => {

@@ -32,7 +32,8 @@ jobs:
 
       - name: Build
         run: |
-          mv last public/
+          go run . release
+          mv uma.json last public/
           npm install
           npm run build
 
