@@ -31,8 +31,8 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
 github.com/rivo/uniseg v0.4.4/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
-github.com/sunshineplan/chrome v1.1.11 h1:wQETSolkfj4Z0aA0I6jkX5wUC/mG+d4cPt+zDMAG4is=
-github.com/sunshineplan/chrome v1.1.11/go.mod h1:T6BhKe32SqLd2/i4DdBTbmM+2UKn17l4F2r17nltxSg=
+github.com/sunshineplan/chrome v1.1.12 h1:BNivZsAE4P1RwZY1uJFuKyViyGHIOJ//D2dfCCwa4R8=
+github.com/sunshineplan/chrome v1.1.12/go.mod h1:T6BhKe32SqLd2/i4DdBTbmM+2UKn17l4F2r17nltxSg=
 github.com/sunshineplan/imgconv v1.1.10 h1:EJZVXLwmvmKgEA1KIJpNSzSssjGaZMdtOLycGFyzxQA=
 github.com/sunshineplan/imgconv v1.1.10/go.mod h1:de9NsLFCMW2JVom3mjRZu3GceLFwkEIEkf1EGS5rDX4=
 github.com/sunshineplan/pdf v1.0.7 h1:62xlc079jh4tGLDjiihyyhwVFkn0IsxLyDpHplbG9Ew=
