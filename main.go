@@ -20,6 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("%x", sum)
 
 	switch flag.Arg(0) {
 	case "release":
