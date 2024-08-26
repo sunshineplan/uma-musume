@@ -55,7 +55,7 @@ func (p *gamewith) events() (events []event, err error) {
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
 	done := chrome.ListenEvent(ctx, "https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
-	if err = chromedp.Run(ctx, chromedp.Navigate("https://umamusume.sunshineplan.cc/gamewith.html")); err != nil {
+	if err = chromedp.Run(ctx, chromedp.Navigate("https://sunshineplan.cc/gamewith.html")); err != nil {
 		return
 	}
 	select {
