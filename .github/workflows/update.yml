@@ -1,0 +1,56 @@
+name: Update
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 16 * * *'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs:
+      new_data: ${{ steps.check_update.outputs.new_data }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Check Update
+        id: check_update
+        run: |
+          go run .
+          git config user.name "GitHub Actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff-index --quiet HEAD || echo "new_data=1" >> $GITHUB_OUTPUT
+
+      - name: Commit
+        if: steps.check_update.outputs.new_data == 1
+        run: |
+          git commit -m "Update game data"
+          git push
+
+      - name: Setup Node
+        if: steps.check_update.outputs.new_data == 1
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Build
+        if: steps.check_update.outputs.new_data == 1
+        run: |
+          go run . release
+          mv uma.json last public/
+          npm install
+          npm run build
+
+      - name: GitHub Pages Deploy
+        if: steps.check_update.outputs.new_data == 1
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          cname: ${{ secrets.CNAME }}

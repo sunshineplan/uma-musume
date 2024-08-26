@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [ Test, Dependabot ]
+    types: 
+      - completed
+
+jobs:
+  deploy:
+    if: |
+      github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' &&
+        (github.event.workflow_run.name == 'Test' && github.event.workflow_run.head_branch == 'main' ||
+         github.event.workflow_run.name == 'Dependabot')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Build
+        run: |
+          go run . release
+          mv uma.json last public/
+          npm install
+          npm run build
+
+      - name: GitHub Pages Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          cname: ${{ secrets.CNAME }}

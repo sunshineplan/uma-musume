@@ -1,0 +1,10 @@
+:root {
+  --nav: 80px;
+  --filter: 289px;
+}
+
+.sub-info {
+  color: grey;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
