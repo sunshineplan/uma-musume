@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { uma } from "../uma.svelte";
   import Image from "./Image.svelte";
-  import { support } from "../stores";
+
+  const supports = document.getElementById("supports");
 
   //https://gametora.com/umamusume
   const type: { [key: string]: Support["type"] } = {
@@ -19,15 +21,14 @@
 <ul class="type">
   {#each Object.entries(type) as [key, value] (key)}
     <li>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
-        class:checked={$support.type == value}
-        on:click={() => {
-          const div = document.getElementById("supports");
-          if (div) div.scrollTop = 0;
-          if ($support.type == value) $support.type = undefined;
-          else $support.type = value;
+        class:checked={uma.support.type == value}
+        onclick={() => {
+          if (supports) supports.scrollTop = 0;
+          if (uma.support.type == value) uma.support.type = undefined;
+          else uma.support.type = value;
         }}
       >
         <Image id={key} alt={key} type="type" />
@@ -38,15 +39,14 @@
 <ul class="rare">
   {#each rare as r (r)}
     <li>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
-        class:checked={$support.rare == r}
-        on:click={() => {
-          const div = document.getElementById("supports");
-          if (div) div.scrollTop = 0;
-          if ($support.rare == r) $support.rare = undefined;
-          else $support.rare = r;
+        class:checked={uma.support.rare == r}
+        onclick={() => {
+          if (supports) supports.scrollTop = 0;
+          if (uma.support.rare == r) uma.support.rare = undefined;
+          else uma.support.rare = r;
         }}
       >
         {#if r}

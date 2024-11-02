@@ -17,3 +17,20 @@ interface Support {
   type?: 'スピ' | 'スタ' | 'パワ' | '根性' | '賢さ' | '友人' | 'グル'
   rare?: 'SSR' | 'SR' | 'R'
 }
+
+interface FilterTypeRegistry {
+  character: {
+    name: string
+    rare?: string
+    image: string
+  }
+  support: {
+    name: string
+    rare: string
+    image: string
+  }
+}
+
+type FilterType = keyof FilterTypeRegistry
+
+type Filter<FType extends FilterType = FilterType> = { type: FType } & FilterTypeRegistry[FType]

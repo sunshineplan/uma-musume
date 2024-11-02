@@ -1,72 +1,17 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
+  import { uma } from "../uma.svelte";
   import Image from "./Image.svelte";
-  import { events, filter, query, showFilter } from "../stores";
 
-  let results: Event[] = [];
-  let count = 0;
-  let current = 0;
+  let results = $state<Event[]>([]);
+  let resultsDIV: HTMLElement;
 
-  $: $filter, search();
-
-  const match = (value: string, event: Event) => {
-    if (
-      event.c.includes(value) ||
-      event.e.includes(value) ||
-      event.k.includes(value)
-    )
-      return true;
-    let matched = false;
-    event.o.forEach((option) => {
-      if (option.b.includes(value)) matched = true;
-    });
-    return matched;
-  };
-
-  const search = () => {
-    let res: Event[] = [];
-    if (!$query) {
-      if ($filter.name) res = $events;
-    } else if ($filter.name ? $query.length > 0 : $query.length > 1) {
-      $events.forEach((event) => {
-        if (match($query, event)) res.push(event);
-      });
-    }
-    const div = document.getElementById("results");
-    if (div) div.scrollTop = 0;
-    const interval = 70;
-    current++;
-    const pid = current;
-    const length = results.length > 5 ? 5 : results.length;
-    if (length) {
-      results = results.slice(0, length);
-      const id = setInterval(() => {
-        if (results.length && pid == current) {
-          results = results.slice(1, results.length);
-          return;
-        }
-        clearInterval(id);
-      }, interval);
-    }
-    if ((count = res.length))
-      setTimeout(
-        () => {
-          if (pid == current) {
-            let i = 1;
-            const id = setInterval(() => {
-              if (i <= 5 && i <= count && pid == current) {
-                results = res.slice(0, i);
-                i++;
-                return;
-              }
-              clearInterval(id);
-              if (count > 5 && pid == current) results = res;
-            }, interval);
-          }
-        },
-        length ? length * interval + 300 : 0
-      );
-  };
+  $effect(() => {
+    resultsDIV.scrollTop = 0;
+    results = [];
+    const length = uma.events.length > 30 ? 30 : uma.events.length;
+    results = uma.events.slice(0, length);
+  });
 
   const addlink = (option: { b: string; g: string; s: object }) => {
     let result = option.g;
@@ -74,42 +19,40 @@
       Object.entries(option.s).forEach(([key, value]) => {
         result = result.replaceAll(
           `『${key}』`,
-          `<a href="${value}" target="_blank">『${key}』</a>`
+          `<a href="${value}" target="_blank">『${key}』</a>`,
         );
       });
     return result;
   };
 
   const reset = () => {
-    $query = "";
+    uma.query = "";
     results = [];
   };
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="content" on:mousedown={showFilter.off}>
+<div class="content">
   <div class="input-group">
     <input
       class="form-control"
       type="search"
       placeholder="ウマ娘名、イベント、選択肢テキスト"
-      bind:value={$query}
-      on:keydown={(e) => {
+      bind:value={uma.query}
+      onkeydown={(e) => {
         if (e.key === "Escape") reset();
       }}
-      on:input={search}
     />
   </div>
   <div class="message">
-    <span>{`※${$filter.name ? 1 : 2}文字以上入力すると検索を開始します`}</span>
-    <span style="float:right">{`(${count}/${$events.length})`}</span>
+    <span>※文字入力すると検索を開始します</span>
+    <span style="float:right">{`(${uma.events.length}/${uma.count})`}</span>
   </div>
-  <div id="results">
-    {#each results as result (result.c + result.r + result.e + result.k + JSON.stringify(result.o))}
+  <div id="results" bind:this={resultsDIV}>
+    {#each results as result, i (JSON.stringify(result))}
       <table
         class="table table-bordered"
-        in:fly={{ x: "100%", duration: 400 }}
-        out:fly={{ x: "100%", duration: 400 }}
+        in:fly={{ x: "100%", delay: i * 70, duration: 400 }}
+        out:fly={{ x: "100%", delay: i * 70, duration: 400 }}
       >
         <thead>
           <tr>
@@ -123,12 +66,12 @@
             <td colspan="2">
               <div style="display:flex">
                 {#if result.a || result.i}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
                   <Image
                     id={result.i}
                     alt={result.c}
                     type="link"
-                    on:click={() => {
+                    onclick={() => {
                       if (result.a) window.open(result.a);
                     }}
                   />

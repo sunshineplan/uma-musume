@@ -1,19 +1,32 @@
 <script lang="ts">
-  import { db } from "../stores";
+  import { onMount } from "svelte";
+  import { db } from "../uma.svelte";
 
-  export let id: string;
-  export let alt: string;
-  export let selected: boolean = false;
-  export let title: string = "";
-  export let type: string = "";
-  export let style: string = "";
+  let {
+    id,
+    alt,
+    selected = false,
+    title = "",
+    type = "",
+    style = "",
+    onclick,
+  }: {
+    id: string;
+    alt: string;
+    selected?: boolean;
+    title?: string;
+    type?: string;
+    style?: string;
+    onclick?: () => void;
+  } = $props();
 
-  let src: string =
-    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAgAAAAAAAAAICRAEAOw==";
+  let src: string = $state(
+    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAgAAAAAAAAAICRAEAOw==",
+  );
 
-  $: id, load();
+  onMount(async () => await load(id));
 
-  const load = async () => {
+  const load = async (id: string) => {
     let image: Blob;
     if (!id) return;
     const res = await db.transaction("r", db.table("images"), () => {
@@ -38,9 +51,9 @@
   };
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<img class={type} class:selected {style} {src} {title} {alt} on:click />
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<img class={type} class:selected {style} {src} {title} {alt} {onclick} />
 
 <style>
   img {

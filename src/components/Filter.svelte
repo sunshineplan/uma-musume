@@ -1,73 +1,93 @@
 <script lang="ts">
-  import Support from "./Support.svelte";
+  import { characters, showFilter, uma } from "../uma.svelte";
   import Image from "./Image.svelte";
-  import { characters, supports, filter, query, showFilter } from "../stores";
+  import Support from "./Support.svelte";
 
-  let type = "character";
+  let type = $state("character");
+  let toggle: HTMLElement;
+  let filter: HTMLElement;
+
+  const handleClick = async (event: MouseEvent) => {
+    const target = event.target as Node;
+    if (
+      showFilter.status &&
+      !toggle.contains(target) &&
+      !filter.contains(target)
+    )
+      showFilter.close();
+  };
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<span class="toggle" class:on={$showFilter} on:click={showFilter.switch}>
+<svelte:window onclick={handleClick} />
+
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<span
+  class="toggle"
+  class:on={showFilter.status}
+  bind:this={toggle}
+  onclick={() => showFilter.toggle()}
+>
   <svg
     viewBox="0 0 16 16"
     width="32"
     height="32"
-    fill={$filter.name ? "#007bff" : "#6c757d"}
+    fill={uma.filter.name ? "#007bff" : "#6c757d"}
   >
     <path
       d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"
     />
   </svg>
 </span>
-<div class="filter" class:open={$showFilter}>
+<div class="filter" class:open={showFilter.status} bind:this={filter}>
   <div class="info">
     <div>
       <h5>フィルタ:</h5>
-      <div class="button" class:hidden={$filter.name == ""}>
+      <div class="button" class:hidden={uma.filter.name == ""}>
+        <!-- svelte-ignore a11y_consider_explicit_label -->
         <button
           class="btn-close"
-          on:click={() => {
-            if (window.innerWidth <= 767) showFilter.off();
-            $filter = { type: "character", name: "", image: "" };
+          onclick={() => {
+            showFilter.close();
+            uma.filter = { type: "character", name: "", image: "" };
           }}
-        />
+        ></button>
       </div>
     </div>
     <div class="display">
-      {#if !$filter.name}
+      {#if !uma.filter.name}
         <h5 style="color:gray">無</h5>
-      {:else if $filter.type == "character"}
-        <Image id={$filter.image} alt={$filter.name} type="icon" />
-        <span>{$filter.name}</span>
-      {:else if $filter.type == "support"}
-        <Image id={$filter.image} alt={$filter.name} type="icon" />
+      {:else if uma.filter.type == "character"}
+        <Image id={uma.filter.image} alt={uma.filter.name} type="icon" />
+        <span>{uma.filter.name}</span>
+      {:else if uma.filter.type == "support"}
+        <Image id={uma.filter.image} alt={uma.filter.name} type="icon" />
         <div style="display:grid">
-          <span>{$filter.name}</span>
-          <span>{$filter.rare}</span>
+          <span>{uma.filter.name}</span>
+          <span>{uma.filter.rare}</span>
         </div>
       {/if}
     </div>
   </div>
   <ul class="nav nav-tabs">
     <li class="nav-item">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         class="nav-link"
         class:active={type == "character"}
-        on:click={() => (type = "character")}
+        onclick={() => (type = "character")}
       >
         キャラ
       </span>
     </li>
     <li class="nav-item">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         class="nav-link"
         class:active={type == "support"}
-        on:click={() => (type = "support")}
+        onclick={() => (type = "support")}
       >
         サポート
       </span>
@@ -78,26 +98,32 @@
       <div class="characters list">
         {#each characters as i (i.name)}
           <li>
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
             <Image
-              selected={$filter.type == "character" && $filter.name == i.name}
+              selected={uma.filter.type == "character" &&
+                uma.filter.name == i.name}
               id={i.image}
               alt={i.name}
               title={i.name}
               type="icon"
               style="height:72px"
-              on:click={() => {
-                if (window.innerWidth <= 767) showFilter.off();
+              onclick={() => {
+                showFilter.close();
                 if (
-                  $filter.name &&
-                  ($filter.type == "support" ||
-                    ($filter.type == "character" && $filter.name != i.name))
+                  uma.filter.name &&
+                  (uma.filter.type == "support" ||
+                    (uma.filter.type == "character" &&
+                      uma.filter.name != i.name))
                 )
-                  $query = "";
-                if ($filter.type == "character" && $filter.name == i.name)
-                  $filter = { type: "character", name: "", image: "" };
+                  uma.query = "";
+                if (uma.filter.type == "character" && uma.filter.name == i.name)
+                  uma.filter = { type: "character", name: "", image: "" };
                 else
-                  $filter = { type: "character", name: i.name, image: i.image };
+                  uma.filter = {
+                    type: "character",
+                    name: i.name,
+                    image: i.image,
+                  };
               }}
             />
           </li>
@@ -106,29 +132,34 @@
     {:else}
       <Support />
       <div id="supports" class="list">
-        {#if $supports.length}
-          {#each $supports as i (i.image)}
+        {#if uma.supports.length}
+          {#each uma.supports as i (i.image)}
             <li>
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
               <Image
-                selected={$filter.type == "support" && $filter.image == i.image}
+                selected={uma.filter.type == "support" &&
+                  uma.filter.image == i.image}
                 id={i.image}
                 alt={i.name}
                 title={i.name}
                 type="icon"
                 style="min-height:96px"
-                on:click={() => {
-                  if (window.innerWidth <= 767) showFilter.off();
+                onclick={() => {
+                  showFilter.close();
                   if (
-                    $filter.name &&
-                    ($filter.type == "character" ||
-                      ($filter.type == "support" && $filter.image != i.image))
+                    uma.filter.name &&
+                    (uma.filter.type == "character" ||
+                      (uma.filter.type == "support" &&
+                        uma.filter.image != i.image))
                   )
-                    $query = "";
-                  if ($filter.type == "support" && $filter.image == i.image)
-                    $filter = { type: "support", name: "", image: "" };
+                    uma.query = "";
+                  if (
+                    uma.filter.type == "support" &&
+                    uma.filter.image == i.image
+                  )
+                    uma.filter = { type: "support", name: "", image: "" };
                   else
-                    $filter = {
+                    uma.filter = {
                       type: "support",
                       name: i.name,
                       rare: i.rare,
