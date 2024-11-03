@@ -9,7 +9,6 @@
 
   $effect(() => {
     resultsDIV.scrollTop = 0;
-    results = [];
     const length = uma.events.length > max ? max : uma.events.length;
     results = uma.events.slice(0, length);
   });
@@ -52,8 +51,8 @@
     {#each results as result, i (JSON.stringify(result))}
       <table
         class="table table-bordered"
-        in:fly={{ x: "100%", delay: i * 70, duration: 400 }}
-        out:fly={{ x: "100%", delay: i * 70, duration: 400 }}
+        in:fly={{ x: "100%", delay: i < 3 ? i * 70 : 0, duration: 400 }}
+        out:fly={{ x: "100%", delay: i < 3 ? i * 70 : 0, duration: 400 }}
       >
         <thead>
           <tr>
