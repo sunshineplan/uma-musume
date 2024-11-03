@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { db } from "../uma.svelte";
+  import { uma } from "../uma.svelte";
 
   let {
     id,
@@ -20,40 +19,43 @@
     onclick?: () => void;
   } = $props();
 
-  let src: string = $state(
-    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAgAAAAAAAAAICRAEAOw==",
-  );
+  const blank =
+    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAgAAAAAAAAAICRAEAOw==";
 
-  onMount(async () => await load(id));
-
-  const load = async (id: string) => {
-    let image: Blob;
-    if (!id) return;
-    const res = await db.transaction("r", db.table("images"), () => {
-      return db.table("images").get({ id });
-    });
-    if (res) image = res.image;
-    else image = new Blob();
-    if (!image.size) {
-      const img = id;
-      let url = `/image/${img}`;
-      if (!id.endsWith(".png")) url = `/support/${img}.png`;
+  const src = $derived.by(async () => {
+    if (!id) return blank;
+    let image = await uma.loadImage(id);
+    if (!image?.size) {
+      let url = `/image/${id}`;
+      if (!id.endsWith(".png")) url = `/support/${id}.png`;
       try {
         const resp = await fetch(url);
         if (resp.ok) {
           image = await resp.blob();
-          if (img && image.size) db.table("images").put({ id: img, image });
+          if (id && image.size) await uma.saveImage({ id, image });
         }
       } catch {}
     }
-    if (image.size) src = URL.createObjectURL(image);
-    else src = "";
-  };
+    if (image?.size) return URL.createObjectURL(image);
+    else return "";
+  });
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<img class={type} class:selected {style} {src} {title} {alt} {onclick} />
+{#await src}
+  <img
+    class={type}
+    class:selected
+    {style}
+    src={blank}
+    {title}
+    {alt}
+    {onclick}
+  />
+{:then src}
+  <img class={type} class:selected {style} {src} {title} {alt} {onclick} />
+{/await}
 
 <style>
   img {

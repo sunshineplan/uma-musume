@@ -1,22 +1,24 @@
 import { Dexie } from 'dexie'
 import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
 
-export const db = new Dexie('umamusume')
+const db = new Dexie('umamusume')
 db.version(1).stores({
   events: '++id',
   images: 'id',
 })
+const eventsTable = db.table<Event>('events')
+const imagesTable = db.table<Image>('images')
 
 const init = async (last: string) => {
   const resp = await fetch('uma.json', { cache: 'no-cache' })
   const events = await resp.json()
   if (events) {
-    await db.transaction('rw!', db.table('events'), async () => {
-      await db.table('events').clear()
-      await db.table('events').bulkAdd(events)
+    await db.transaction('rw!', eventsTable, async () => {
+      await eventsTable.clear()
+      await eventsTable.bulkAdd(events)
     }).then(() => setCookie('last', last, { expires: 365 }))
   }
-  return events as Event[]
+  return events
 }
 
 const loadEvents = async () => {
@@ -24,7 +26,7 @@ const loadEvents = async () => {
   const last = await resp.text()
   let events: Event[]
   if (last != getCookie('last')) events = await init(last)
-  else events = await db.table('events').toArray()
+  else events = await eventsTable.toArray()
   if (!events || !events.length) {
     removeCookie('last')
     return await loadEvents()
@@ -97,6 +99,15 @@ class UMA {
       if (option.b.includes(value)) matched = true
     })
     return matched
+  }
+  async loadImage(id: string) {
+    const res = await db.transaction("r", imagesTable, () => {
+      return imagesTable.get({ id });
+    });
+    return res?.image
+  }
+  async saveImage(image: Image) {
+    await imagesTable.put(image)
   }
 }
 export const uma = new UMA

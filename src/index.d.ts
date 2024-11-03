@@ -18,6 +18,11 @@ interface Support {
   rare?: 'SSR' | 'SR' | 'R'
 }
 
+interface Image {
+  id: string
+  image: Blob
+}
+
 interface FilterTypeRegistry {
   character: {
     name: string

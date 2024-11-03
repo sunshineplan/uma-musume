@@ -3,13 +3,14 @@
   import { uma } from "../uma.svelte";
   import Image from "./Image.svelte";
 
+  const max = 100;
   let results = $state<Event[]>([]);
   let resultsDIV: HTMLElement;
 
   $effect(() => {
     resultsDIV.scrollTop = 0;
     results = [];
-    const length = uma.events.length > 30 ? 30 : uma.events.length;
+    const length = uma.events.length > max ? max : uma.events.length;
     results = uma.events.slice(0, length);
   });
 
