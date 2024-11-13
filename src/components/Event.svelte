@@ -4,13 +4,14 @@
   import Image from "./Image.svelte";
 
   const max = 100;
-  let results = $state<Event[]>([]);
   let resultsDIV: HTMLElement;
 
-  $effect(() => {
-    resultsDIV.scrollTop = 0;
-    const length = uma.events.length > max ? max : uma.events.length;
-    results = uma.events.slice(0, length);
+  const results = $derived.by(() => {
+    if (resultsDIV) resultsDIV.scrollTop = 0;
+    return uma.events.slice(
+      0,
+      uma.events.length > max ? max : uma.events.length,
+    );
   });
 
   const addlink = (option: { b: string; g: string; s: object }) => {
@@ -24,11 +25,6 @@
       });
     return result;
   };
-
-  const reset = () => {
-    uma.query = "";
-    results = [];
-  };
 </script>
 
 <div class="content">
@@ -39,7 +35,7 @@
       placeholder="ウマ娘名、イベント、選択肢テキスト"
       bind:value={uma.query}
       onkeydown={(e) => {
-        if (e.key === "Escape") reset();
+        if (e.key === "Escape") uma.query = "";
       }}
     />
   </div>
