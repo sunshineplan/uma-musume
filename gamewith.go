@@ -49,9 +49,7 @@ type gamewith struct {
 
 func (p gamewith) name() string { return "GameWith" }
 
-func (p *gamewith) events() (events []event, err error) {
-	c := chrome.Headless()
-	defer c.Close()
+func (p *gamewith) events(c *chrome.Chrome) (events []event, err error) {
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
 	done := chrome.ListenEvent(ctx, "https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)

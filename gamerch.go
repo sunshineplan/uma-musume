@@ -55,9 +55,7 @@ type gamerch struct {
 
 func (p gamerch) name() string { return "Gamerch" }
 
-func (p *gamerch) events() (events []event, err error) {
-	c := chrome.Headless()
-	defer c.Close()
+func (p *gamerch) events(c *chrome.Chrome) (events []event, err error) {
 	if err = c.EnableFetch(func(ev *fetch.EventRequestPaused) bool {
 		return ev.ResourceType == network.ResourceTypeDocument ||
 			(ev.ResourceType == network.ResourceTypeScript && !regexp.MustCompile("googletag|popin").MatchString(ev.Request.URL)) ||

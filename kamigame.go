@@ -28,9 +28,7 @@ type kamigame struct {
 
 func (p kamigame) name() string { return "kamigame" }
 
-func (p *kamigame) events() (events []event, err error) {
-	c := chrome.Headless()
-	defer c.Close()
+func (p *kamigame) events(c *chrome.Chrome) (events []event, err error) {
 	if err = c.EnableFetch(func(ev *fetch.EventRequestPaused) bool {
 		return ev.ResourceType == network.ResourceTypeDocument ||
 			(ev.ResourceType == network.ResourceTypeScript && !strings.Contains(ev.Request.URL, "doubleclick")) ||

@@ -6,13 +6,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/sunshineplan/chrome"
 )
 
 func main() {
 	flag.Parse()
 
 	api := new(gamewith)
-	events, err := api.events()
+	c := chrome.Headless().NoSandbox()
+	defer c.Close()
+	events, err := api.events(c)
 	if err != nil {
 		log.Fatal(err)
 	}

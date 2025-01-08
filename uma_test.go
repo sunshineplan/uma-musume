@@ -4,6 +4,8 @@ import (
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/sunshineplan/chrome"
 )
 
 func searchEvent(event string, events []event) (res []event) {
@@ -26,7 +28,9 @@ func TestUMA(t *testing.T) {
 	}
 
 	for _, p := range []provider{&gamewith{}, &kamigame{}} {
-		events, err := p.events()
+		c := chrome.Headless().NoSandbox()
+		defer c.Close()
+		events, err := p.events(c)
 		if err != nil {
 			t.Errorf("%s: %s", p.name(), err)
 			continue

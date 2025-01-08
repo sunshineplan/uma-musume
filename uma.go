@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/imgconv"
 )
 
@@ -70,7 +71,7 @@ func parseScenario(c character) (scenario, bool) {
 
 type provider interface {
 	name() string
-	events() ([]event, error)
+	events(*chrome.Chrome) ([]event, error)
 	images() error
 }
 
