@@ -1,7 +1,6 @@
 module uma
 
-go 1.23
-toolchain go1.24.1
+go 1.24
 
 require (
 	github.com/chromedp/cdproto v0.0.0-20250222051814-50c6cb17f10a
