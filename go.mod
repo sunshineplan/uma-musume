@@ -3,8 +3,8 @@ module uma
 go 1.24
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20250319231242-a755498943c8
-	github.com/chromedp/chromedp v0.13.3
+	github.com/chromedp/cdproto v0.0.0-20250401205909-91afd104e2b8
+	github.com/chromedp/chromedp v0.13.5
 	github.com/sunshineplan/chrome v1.1.21
 	github.com/sunshineplan/imgconv v1.1.14
 )
