@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { uma } from "../uma.svelte";
 
   let {
@@ -19,43 +20,50 @@
     onclick?: () => void;
   } = $props();
 
+  let src = $state("");
+  let imageElement: HTMLImageElement;
+
   const blank =
     "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAgAAAAAAAAAICRAEAOw==";
 
-  const src = $derived.by(async () => {
-    if (!id) return blank;
-    let image = await uma.loadImage(id);
-    if (!image?.size) {
-      let url = `/image/${id}`;
-      if (!id.endsWith(".png")) url = `/support/${id}.png`;
-      try {
-        const resp = await fetch(url);
-        if (resp.ok) {
-          image = await resp.blob();
-          if (id && image.size) await uma.saveImage({ id, image });
+  onMount(() => {
+    const observer = new IntersectionObserver(async ([entry]) => {
+      if (entry.isIntersecting) {
+        observer.disconnect();
+        if (!id) return;
+        let image = await uma.loadImage(id);
+        if (!image?.size) {
+          let url = `/image/${id}`;
+          if (!id.endsWith(".png")) url = `/support/${id}.png`;
+          try {
+            const resp = await fetch(url);
+            if (resp.ok) {
+              image = await resp.blob();
+              if (id && image.size) await uma.saveImage({ id, image });
+            }
+          } catch {}
         }
-      } catch {}
-    }
-    if (image?.size) return URL.createObjectURL(image);
-    else return "";
+        if (image?.size) src = URL.createObjectURL(image);
+      }
+    });
+    observer.observe(imageElement);
+    return () => observer.disconnect();
   });
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-{#await src}
-  <img
-    class={type}
-    class:selected
-    {style}
-    src={blank}
-    {title}
-    {alt}
-    {onclick}
-  />
-{:then src}
-  <img class={type} class:selected {style} {src} {title} {alt} {onclick} />
-{/await}
+<img
+  bind:this={imageElement}
+  class={type}
+  class:selected
+  {style}
+  src={src || blank}
+  {title}
+  {alt}
+  {onclick}
+  loading="lazy"
+/>
 
 <style>
   img {
