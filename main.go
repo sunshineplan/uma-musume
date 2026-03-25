@@ -13,7 +13,7 @@ import (
 func main() {
 	flag.Parse()
 
-	api := new(gamewith)
+	api := new(kamigame)
 	c := chrome.Headless().NoSandbox()
 	defer c.Close()
 	events, err := api.events(c)

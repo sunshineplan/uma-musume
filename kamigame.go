@@ -8,6 +8,7 @@ import (
 	"log"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -41,7 +42,7 @@ func (p *kamigame) events(c *chrome.Chrome) (events []event, err error) {
 	var res [][]byte
 	done := chrome.ListenEvent(ctx, "https://kamigame.jp/vls-kamigame-gametool/json", "GET", true)
 	go chromedp.Run(ctx, chromedp.Navigate("https://kamigame.jp/umamusume/page/152540608660042049.html"))
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		select {
 		case <-ctx.Done():
 			err = ctx.Err()
@@ -115,9 +116,14 @@ func (p *kamigame) events(c *chrome.Chrome) (events []event, err error) {
 		events = append(events, p.generate(event, i)...)
 	}
 
+	グル := []character{
+		"チーム＜シリウス＞",
+		"玉座に集いし者たち",
+		"刻み続ける者たち",
+		"祖にして導く者",
+	}
 	for i, event := range events {
-		if event.Character == "チーム＜シリウス＞" || event.Character == "玉座に集いし者たち" {
-			log.Printf("%s's Rare should be グルSSR, now is %s", event.Character, event.Rare)
+		if slices.Contains(グル, event.Character) {
 			events[i].Rare = "グルSSR"
 		}
 	}
@@ -146,11 +152,6 @@ func (p *kamigame) images() error {
 func (p *kamigame) generate(event event, choices []any) (events []event) {
 	options, success, failure := split(choices[4]), split(choices[5]), split(choices[6])
 	n := len(failure)
-	if len(options) != len(success) || (n != 1 && n != len(options)) {
-		log.Println("bad data:", choices)
-		return
-	}
-
 	for i, opt := range options {
 		option := option{opt, "", make(map[string]string)}
 		if n > i {
@@ -190,10 +191,20 @@ func (p *kamigame) generate(event event, choices []any) (events []event) {
 		}
 		events = append(events, event)
 	case "m":
+		switch event.Character {
+		case "メイクラ":
+			event.Character = "クライマックス"
+		case "グラライ":
+			event.Character = "グランドライブ"
+		case "ラーク":
+			event.Character = "プロジェクトL’Arc"
+		}
 		if scenario, ok := parseScenario(event.Character); ok {
 			event.Image = scenarioList[scenario]
 		} else if event.Character == "共通" {
 			event.Image = "rijicho.png"
+		} else {
+			log.Println("unknown scenario:", event.Character)
 		}
 		events = append(events, event)
 	case "s":
@@ -215,5 +226,5 @@ func (p *kamigame) generate(event event, choices []any) (events []event) {
 }
 
 func split(s any) []string {
-	return strings.Split(strings.TrimSpace(s.(string)), "\n")
+	return strings.Split(s.(string), "\n")
 }

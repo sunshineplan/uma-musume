@@ -27,7 +27,7 @@ func TestUMA(t *testing.T) {
 		//"新曲プロデュース":        "初心にかえりましょう",         // グランドライブ
 	}
 
-	for _, p := range []provider{&gamewith{}, &kamigame{}} {
+	for _, p := range []provider{&kamigame{}} {
 		c := chrome.Headless().NoSandbox()
 		defer c.Close()
 		events, err := p.events(c)
