@@ -117,7 +117,7 @@ func downloadImage(url, path string, converter *imgconv.Options) error {
 	}
 
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		log.Println("downloading", url)
+		//log.Println("downloading", url)
 
 		resp, err := http.Get(url)
 		if err != nil {

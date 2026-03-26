@@ -140,8 +140,12 @@ func (p *kamigame) events(c *chrome.Chrome) (events []event, err error) {
 
 func (p *kamigame) images() error {
 	for article, url := range p.data {
-		id := regexp.MustCompile(`(\d+).html`).FindStringSubmatch(article)[1]
-		if err := downloadImage(url, fmt.Sprintf("public/image/%s.png", id), nil); err != nil {
+		id := regexp.MustCompile(`(\d+).html`).FindStringSubmatch(article)
+		if len(id) < 2 {
+			log.Println("invalid article URL:", article, url)
+			continue
+		}
+		if err := downloadImage(url, fmt.Sprintf("public/image/%s.png", id[1]), nil); err != nil {
 			return err
 		}
 	}
