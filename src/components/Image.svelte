@@ -26,28 +26,26 @@
   const blank =
     "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAgAAAAAAAAAICRAEAOw==";
 
-  onMount(() => {
-    const observer = new IntersectionObserver(async ([entry]) => {
-      if (entry.isIntersecting) {
-        observer.disconnect();
-        if (!id) return;
-        let image = await uma.loadImage(id);
-        if (!image?.size) {
-          let url = `/image/${id}`;
-          if (!id.endsWith(".png")) url = `/support/${id}.png`;
-          try {
-            const resp = await fetch(url);
-            if (resp.ok) {
-              image = await resp.blob();
-              if (id && image.size) await uma.saveImage({ id, image });
-            }
-          } catch {}
+  const loadImage = async (id: string) => {
+    let image = await uma.loadImage(id);
+    if (!image?.size) {
+      let url = `/image/${id}`;
+      if (!id.endsWith(".png")) url = `/support/${id}.png`;
+      try {
+        const resp = await fetch(url);
+        if (resp.ok) {
+          image = await resp.blob();
+          if (id && image.size) await uma.saveImage({ id, image });
         }
-        if (image?.size) src = URL.createObjectURL(image);
-      }
-    });
-    observer.observe(imageElement);
-    return () => observer.disconnect();
+      } catch {}
+    }
+    if (image?.size) src = URL.createObjectURL(image);
+    else src = blank;
+  };
+
+  $effect(() => {
+    if (!id) return;
+    loadImage(id);
   });
 </script>
 
