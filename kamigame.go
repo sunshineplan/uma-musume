@@ -102,7 +102,7 @@ func (p *kamigame) events(c *chrome.Chrome) (events []event, err error) {
 
 		var event event
 		event.Event = i[0].(string)
-		event.Character = parseCharacter(i[2])
+		event.Character = character(i[2].(string))
 		event.Keyword = i[7].(string)
 		switch i[1] {
 		case "育成ウマ娘":
@@ -111,6 +111,7 @@ func (p *kamigame) events(c *chrome.Chrome) (events []event, err error) {
 			event.Type = "s"
 		case "メインシナリオ":
 			event.Type = "m"
+			event.Character = parseCharacter(i[2])
 		}
 
 		events = append(events, p.generate(event, i)...)
@@ -183,7 +184,7 @@ func (p *kamigame) generate(event event, choices []any) (events []event) {
 	switch event.Type {
 	case "c":
 		for _, i := range p.character {
-			if event.Character == parseCharacter(i[0]) {
+			if event.Character == character(i[0].(string)) {
 				event.Article = fmt.Sprint("https://kamigame.jp", i[1])
 				if re := regexp.MustCompile(`(\d+).html`); re.MatchString(event.Article) {
 					event.Image = re.FindStringSubmatch(event.Article)[1] + ".png"
@@ -213,7 +214,7 @@ func (p *kamigame) generate(event event, choices []any) (events []event) {
 		events = append(events, event)
 	case "s":
 		for _, i := range p.support {
-			if character := parseCharacter(i[1]); character != "" && event.Character == character && strings.Contains(i[6].(string), event.Event) {
+			if character := character(i[1].(string)); character != "" && event.Character == character && strings.Contains(i[6].(string), event.Event) {
 				event.Article = fmt.Sprint("https://kamigame.jp", i[2])
 				if re := regexp.MustCompile(`(\d+).html`); re.MatchString(event.Article) {
 					event.Image = re.FindStringSubmatch(event.Article)[1] + ".png"
