@@ -53,7 +53,7 @@ func (p *gamewith) events(c *chrome.Chrome) (events []event, err error) {
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
 	done := chrome.ListenEvent(ctx, "https://gamewith-tool.s3-ap-northeast-1.amazonaws.com/uma-musume/male_event_datas.js", "GET", false)
-	if err = chromedp.Run(ctx, chromedp.Navigate("https://umamusume.sunshineplan.cc/gamewith.html")); err != nil {
+	if err = chromedp.Do(ctx, chromedp.Navigate("https://umamusume.sunshineplan.cc/gamewith.html")); err != nil {
 		return
 	}
 	select {
@@ -62,15 +62,16 @@ func (p *gamewith) events(c *chrome.Chrome) (events []event, err error) {
 	case <-done:
 	}
 
-	var imageDatas gamewithImages
-	var eventDatas []gamewithEvent
-	var linkDatas map[string]string
-	if err = chromedp.Run(
-		ctx,
-		chromedp.Evaluate("imageDatas", &imageDatas),
-		chromedp.Evaluate("linkDatas", &linkDatas),
-		chromedp.Evaluate("eventDatas['男']", &eventDatas),
-	); err != nil {
+	imageDatas, err := chromedp.Run(ctx, chromedp.Evaluate[gamewithImages]("imageDatas"))
+	if err != nil {
+		return
+	}
+	eventDatas, err := chromedp.Run(ctx, chromedp.Evaluate[[]gamewithEvent]("eventDatas['男']"))
+	if err != nil {
+		return
+	}
+	linkDatas, err := chromedp.Run(ctx, chromedp.Evaluate[map[string]string]("linkDatas"))
+	if err != nil {
 		return
 	}
 

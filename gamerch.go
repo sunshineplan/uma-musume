@@ -67,7 +67,7 @@ func (p *gamerch) events(c *chrome.Chrome) (events []event, err error) {
 	defer cancel()
 	var res gamerchEvents
 	done := chrome.ListenEvent(ctx, regexp.MustCompile(`https://cdn\.gamerch\.com/contents/plugin/umamusume/events-\d+\.json`), "GET", true)
-	if err = chromedp.Run(ctx, chromedp.Navigate("https://gamerch.com/umamusume/event-checker")); err != nil {
+	if err = chromedp.Do(ctx, chromedp.Navigate("https://gamerch.com/umamusume/event-checker")); err != nil {
 		return
 	}
 	select {
